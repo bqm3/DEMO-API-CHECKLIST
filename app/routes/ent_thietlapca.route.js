@@ -6,6 +6,7 @@ module.exports = (app) => {
 
   // Create a new Ent_calv
   router.post("/create", [isAuthenticated], ent_thietlapca.create);
+  router.get("/", [isAuthenticated], ent_thietlapca.get);
   
   app.use("/api/ent_thietlapca", router);
 };

@@ -52,6 +52,7 @@ var corsOptions = {
     "https://minhepzai.cckvn.vn/",
     "http://minhepzai.cckvn.vn/",
     "https://qlts.pmcweb.vn",
+    "https://40ce-14-191-164-110.ngrok-free.app"
   ],
 
   credentials: true, //access-control-allow-credentials:true
@@ -87,7 +88,7 @@ require("./app/routes/tb_checklistchitiet.route")(app);
 require("./app/routes/tb_checklistchitietdone.route")(app);
 
 
-const PORT = process.env.PORT || 6868;
+const PORT = process.env.PORT || 6969;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
