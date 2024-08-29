@@ -49,8 +49,8 @@ var corsOptions = {
     "http://localhost:3000",
     "http://localhost:3006",
     "https://checklist.pmcweb.vn",
-    "https://minhepzai.cckvn.vn/",
-    "http://minhepzai.cckvn.vn/",
+    "https://minhepzai.cckvn.vn",
+    "http://minhepzai.cckvn.vn",
     "https://qlts.pmcweb.vn",
     "https://40ce-14-191-164-110.ngrok-free.app"
   ],
