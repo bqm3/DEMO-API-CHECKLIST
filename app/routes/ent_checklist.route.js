@@ -31,10 +31,12 @@ module.exports = (app) => {
   );
 
   router.put(
-    "/filter/:idc/:id_calv",
+    "/filter-return/:idc/:id_calv",
     isAuthenticated,
-    ent_checklist.KhuvucChecklists
+    ent_checklist.filterReturn
   );
+
+  router.put("/delete-mul", [isAuthenticated], ent_checklist.deleteMul)
   router.post("/uploads", [isAuthenticated, upload.single('files')], ent_checklist.uploadFiles)
 
   app.use("/api/ent_checklist", router);

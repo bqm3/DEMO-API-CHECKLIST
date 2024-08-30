@@ -104,7 +104,6 @@ exports.get = async (req, res) => {
           "isDelete",
         ],
         include: [
-  
           {
             model: Ent_khuvuc,
             attributes: [
@@ -146,7 +145,6 @@ exports.get = async (req, res) => {
               },
             ],
           },
-         
         ],
         where: {
           isDelete: 0,
@@ -351,6 +349,38 @@ exports.delete = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: error.message || "Lỗi! Vui lòng thử lại sau.",
+    });
+  }
+};
+
+exports.deleteMul = async (req, res) => {
+  try {
+    const userData = req.user.data;
+    const deleteRows = req.body;
+    const idsToDelete = deleteRows.map((row) => row.ID_Hangmuc);
+    if (userData) {
+      Ent_hangmuc.update(
+        { isDelete: 1 },
+        {
+          where: {
+            ID_Hangmuc: idsToDelete,
+          },
+        }
+      )
+        .then((data) => {
+          res.status(200).json({
+            message: "Xóa hạng mục thành công!",
+          });
+        })
+        .catch((err) => {
+          res.status(500).json({
+            message: err.message || "Lỗi! Vui lòng thử lại sau.",
+          });
+        });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      message: err.message || "Lỗi! Vui lòng thử lại sau.",
     });
   }
 };

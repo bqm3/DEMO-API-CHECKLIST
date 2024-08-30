@@ -342,6 +342,38 @@ exports.delete = async (req, res) => {
   }
 };
 
+exports.deleteMul = async (req, res) => {
+  try {
+    const userData = req.user.data;
+    const deleteRows = req.body;
+    const idsToDelete = deleteRows.map((row) => row.ID_Khuvuc);
+    if (userData) {
+      Ent_khuvuc.update(
+        { isDelete: 1 },
+        {
+          where: {
+            ID_Khuvuc: idsToDelete,
+          },
+        }
+      )
+        .then((data) => {
+          res.status(200).json({
+            message: "Xóa khu vực thành công!",
+          });
+        })
+        .catch((err) => {
+          res.status(500).json({
+            message: err.message || "Lỗi! Vui lòng thử lại sau.",
+          });
+        });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      message: err.message || "Lỗi! Vui lòng thử lại sau.",
+    });
+  }
+};
+
 exports.getKhuVucFilter = async (req, res) => {
   try {
     const userData = req.user.data;

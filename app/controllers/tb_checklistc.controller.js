@@ -79,8 +79,8 @@ exports.createFirstChecklist = async (req, res, next) => {
       .startOf("day")
       .format("YYYY-MM-DD");
 
-    const daysDifference = moment(formattedDate).diff(
-      moment(formattedDateNow),
+    const daysDifference = moment(formattedDateNow).diff(
+      moment(formattedDate),
       "days"
     );
 
@@ -90,7 +90,7 @@ exports.createFirstChecklist = async (req, res, next) => {
     if(remainder> 0){
       ngayCheck = remainder
     }else {
-      ngayCheck = khoiData.Chuky + remainder
+      ngayCheck = Math.abs(remainder);
     }
 
     if (!calvData) {
@@ -153,6 +153,12 @@ exports.createFirstChecklist = async (req, res, next) => {
         }
       ]
     })
+
+    if(!thietlapcaData){
+      return res.status(400).json({
+        message: "Chưa thiết lập hạng mục cho ca này!",
+      });
+    }
 
     const checklistData = await Ent_checklist.findAndCountAll({
       attributes: [
@@ -282,7 +288,7 @@ exports.createFirstChecklist = async (req, res, next) => {
             ID_KhoiCV: userData.ID_KhoiCV,
             ID_ThietLapCa: thietlapcaData.ID_ThietLapCa,
             Giobd: convertTimeFormat(Giobd),
-            Ngay: formattedDate,
+            Ngay: formattedDateNow,
             TongC: 0,
             Tong: checklistData.count || 0,
             Tinhtrang: 0,
@@ -314,7 +320,6 @@ exports.createFirstChecklist = async (req, res, next) => {
               (checklist) => checklist.dataValues.ID_Calv !== ID_Calv
             );
 
-            // Nếu tất cả các ca checklist đều đã hoàn thành (Tinhtrang === 1) va khong phai CALV, cho phép tạo mới
             if (allCompletedTwo) {
               const data = {
                 ID_User: userData.ID_User,
@@ -323,7 +328,7 @@ exports.createFirstChecklist = async (req, res, next) => {
                 ID_KhoiCV: userData.ID_KhoiCV,
                 Giobd: convertTimeFormat(Giobd),
                 ID_ThietLapCa: thietlapcaData.ID_ThietLapCa,
-                Ngay: formattedDate,
+                Ngay: formattedDateNow,
                 TongC: 0,
                 Tong: checklistData.count || 0,
                 Tinhtrang: 0,
@@ -541,7 +546,6 @@ exports.getDetail = async (req, res) => {
           "ID_KhoiCV",
           "ID_Calv",
           "ID_ThietLapCa",
-
           "ID_User",
           "Ngay",
           "Giobd",
@@ -999,7 +1003,7 @@ exports.checklistCalv = async (req, res) => {
 
       // Fetch checklist done items
       const checklistDoneItems = await Tb_checklistchitietdone.findAll({
-        attributes: ["Description", "isDelete", "ID_ChecklistC"],
+        attributes: ["Description", "isDelete", "ID_ChecklistC", "Gioht"],
         where: { isDelete: 0, ID_ChecklistC: ID_ChecklistC },
       });
 
@@ -1015,23 +1019,13 @@ exports.checklistCalv = async (req, res) => {
       // Extract all ID_Checklist from checklistDoneItems and fetch related data
       let checklistIds = [];
       if (checklistDoneItems.length > 0) {
-        checklistDoneItems.forEach((item) => {
-          const descriptionArray = item.dataValues.Description;
-          if (Array.isArray(descriptionArray)) {
-            descriptionArray.forEach((description) => {
-              const splitByComma = description.split(",");
-              splitByComma.forEach((splitItem) => {
-                const [ID_Checklist] = splitItem.split("/");
-                checklistIds.push(parseInt(ID_Checklist));
-              });
-            });
-          } else {
-            console.log("descriptionArray is not an array.");
-          }
-        });
+          checklistDoneItems.forEach((item) => {
+            const idChecklists = item.Description.split(",").map(Number); 
+            checklistIds.push(...idChecklists);
+          });
+        // });
       }
 
-      let initialChecklistIds = checklistIds.filter((id) => !isNaN(id));
 
       // Fetch related checklist data
       const relatedChecklists = await Ent_checklist.findAll({
@@ -1048,7 +1042,7 @@ exports.checklistCalv = async (req, res) => {
           "Giatrinhan",
         ],
         where: {
-          ID_Checklist: initialChecklistIds,
+          ID_Checklist: checklistIds,
         },
         include: [
           {
@@ -1118,30 +1112,28 @@ exports.checklistCalv = async (req, res) => {
         ],
       });
 
-      // Merge checklistDoneItems data into arrPush
-      checklistDoneItems.forEach((item) => {
-        const descriptionArray = item.dataValues.Description;
-        if (Array.isArray(descriptionArray)) {
-          descriptionArray.forEach((description) => {
-            const splitByComma = description.split(",");
-            splitByComma.forEach((splitItem) => {
-              const [ID_Checklist, valueCheck, gioht] = splitItem.split("/");
-              const relatedChecklist = relatedChecklists.find(
-                (rl) => rl.ID_Checklist === parseInt(ID_Checklist)
-              );
-              if (relatedChecklist) {
+      if (checklistDoneItems.length > 0) {
+        checklistDoneItems.forEach((item) => {
+          if (checklistIds.length > 0) {
+            checklistIds.map((it) => {
+              if (Number(item.ID_ChecklistC) === Number(req.params.id)) {
+                const relatedChecklist = relatedChecklists.find(
+                  (rl) => rl.ID_Checklist == it
+                );
                 arrPush.push({
-                  ID_Checklist: parseInt(ID_Checklist),
-                  Ketqua: valueCheck,
-                  Gioht: gioht,
+                  ID_ChecklistC: parseInt(item.ID_ChecklistC),
+                  ID_Checklist: it,
+                  Gioht: item.Gioht,
+                  Ketqua: relatedChecklist.Giatridinhdanh,
                   status: 1,
-                  ent_checklist: relatedChecklist,
+                  ent_checklist: relatedChecklist
                 });
               }
             });
-          });
-        }
-      });
+          }
+        });
+        // });
+      }
 
       const dataChecklistC = await Tb_checklistc.findByPk(ID_ChecklistC, {
         attributes: [
@@ -2760,6 +2752,7 @@ exports.createExcelFile = async (req, res) => {
       .json({ message: err.message || "Lỗi! Vui lòng thử lại sau." });
   }
 };
+
 async function processData(data) {
   const aggregatedData = {};
 

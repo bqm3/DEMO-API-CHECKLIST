@@ -7,9 +7,7 @@ const admin = require("firebase-admin");
 const { getMessaging } = require("firebase-admin/messaging");
 const app = express();
 
-
 var serviceAccount = require("./pmc-cskh-firebase-adminsdk-y7378-5122f6edc7.json");
-
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -17,49 +15,47 @@ admin.initializeApp({
 
 // This registration token comes from the client FCM SDKs.
 app.get("/test-noti", async (req, res) => {
-
   const registrationTokens = [
-  "ExponentPushToken[CzoGcLH9L4wqJGVB9V-68-]",
-  "ExponentPushToken[0eplaPHQHUcrFvaEm24iMe]"
+    "ExponentPushToken[CzoGcLH9L4wqJGVB9V-68-]",
+    "ExponentPushToken[0eplaPHQHUcrFvaEm24iMe]",
   ];
 
   const message = {
-    
     notification: {
       title: "Hello World 2",
-      body: "Test Body 2"
+      body: "Test Body 2",
     },
     tokens: registrationTokens,
   };
 
-  getMessaging().sendEachForMulticast(message)
+  getMessaging()
+    .sendEachForMulticast(message)
     .then((response) => {
-      res.json({ response })
-      console.log(response.successCount + ' messages were sent successfully');
+      res.json({ response });
+      console.log(response.successCount + " messages were sent successfully");
     })
-    .catch(err => {
-      console.log(err);  
-    })
+    .catch((err) => {
+      console.log(err);
+    });
 });
-
 
 var corsOptions = {
   origin: [
     "*",
     "http://localhost:3000",
-    "http://localhost:3006",
+    "http://localhost:3636",
     "https://checklist.pmcweb.vn",
     "https://minhepzai.cckvn.vn",
     "http://minhepzai.cckvn.vn",
     "https://qlts.pmcweb.vn",
-    "https://40ce-14-191-164-110.ngrok-free.app"
+    "https://40ce-14-191-164-110.ngrok-free.app",
   ],
 
   credentials: true, //access-control-allow-credentials:true
   optionSuccessStatus: 200,
 };
 
-app.use(cors(corsOptions))
+app.use(cors(corsOptions));
 
 app.use(cookieParser());
 app.use(express.json());
@@ -86,7 +82,6 @@ require("./app/routes/ent_chucvu.route")(app);
 require("./app/routes/tb_checklistc.route")(app);
 require("./app/routes/tb_checklistchitiet.route")(app);
 require("./app/routes/tb_checklistchitietdone.route")(app);
-
 
 const PORT = process.env.PORT || 6969;
 app.listen(PORT, () => {

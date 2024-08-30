@@ -305,14 +305,14 @@ exports.getThongtinduan = async (req, res) => {
             {
               model: Ent_khuvuc,
               as: "ent_khuvuc",
-              attributes: ["ID_Khuvuc", "ID_KhoiCV", "Makhuvuc", "MaQrCode", "Tenkhuvuc", "isDelete"],
+              attributes: ["ID_Khuvuc", "Makhuvuc", "MaQrCode", "Tenkhuvuc", "isDelete"],
               where: { isDelete: 0 },
               required: false,
               include: [
                 {
                   model: Ent_hangmuc,
                   as: "ent_hangmuc",
-                  attributes: ["ID_Hangmuc", "ID_Khuvuc", "Hangmuc", "MaQrCode", "isDelete", "Tieuchuankt", "ID_KhoiCV", "FileTieuChuan"],
+                  attributes: ["ID_Hangmuc", "ID_Khuvuc", "Hangmuc", "MaQrCode", "isDelete", "Tieuchuankt", "FileTieuChuan"],
                   where: { isDelete: 0 },
                   required: false,
                 },
@@ -322,7 +322,7 @@ exports.getThongtinduan = async (req, res) => {
         },
         {
           model: Ent_nhom,
-          attributes: ["Nhom"]
+          attributes: ["Tennhom"]
         }
       ],
       where: {

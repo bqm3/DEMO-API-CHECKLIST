@@ -10,19 +10,7 @@ const Ent_nhom = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    Tenhom: {
-      type: DataTypes.CHAR,
-      allowNull: false,
-    },
-    Soluongcanho: {
-      type: DataTypes.CHAR,
-      allowNull: false,
-    },
-    Soluongnhanvien: {
-      type: DataTypes.CHAR,
-      allowNull: false,
-    },
-    Tenhom: {
+    Tennhom: {
       type: DataTypes.CHAR,
       allowNull: false,
     },

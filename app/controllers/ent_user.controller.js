@@ -339,7 +339,6 @@ exports.getUserOnline = async (req, res, next) => {
         "Password",
         "ID_Duan",
         "ID_KhoiCV",
-        "ID_Khuvucs",
         "ID_Chucvu",
         "isDelete",
       ],
@@ -398,7 +397,7 @@ exports.getDetail = async (req, res) => {
           "ID_User",
           "UserName",
           "Email",
-          "ID_Khuvucs",
+          
           "Password",
           "ID_Duan",
           "ID_KhoiCV",
@@ -455,7 +454,7 @@ exports.checkAuth = async (req, res, next) => {
         "UserName",
         "Email",
         "Password",
-        "ID_Khuvucs",
+        
         "ID_Duan",
         "ID_KhoiCV",
         "deviceToken",
@@ -512,7 +511,7 @@ exports.getGiamSat = async (req, res, next) => {
           "ID_User",
           "UserName",
           "Email",
-          "ID_Khuvucs",
+          
           "Password",
           "ID_Duan",
           "ID_KhoiCV",
@@ -567,7 +566,7 @@ exports.deviceToken = async (req, res, next) => {
           "UserName",
           "Email",
           "Password",
-          "ID_Khuvucs",
+          
           "ID_Duan",
           "ID_KhoiCV",
           "deviceToken",
@@ -662,7 +661,7 @@ exports.notiPush = async (message) => {
         "Password",
         "ID_Duan",
         "ID_KhoiCV",
-        "ID_Khuvucs",
+        
         "ID_Chucvu",
         "isDelete",
       ],

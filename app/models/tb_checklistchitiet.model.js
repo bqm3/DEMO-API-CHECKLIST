@@ -4,7 +4,7 @@ const sequelize = require("../config/db.config");
 const Tb_checklistchitiet = sequelize.define(
   "tb_checklistchitiet",
   {
-    ID_ChecklistChitiet: {
+    ID_Checklistchitiet: {
       type: DataTypes.BIGINT,
       allowNull: false,
       autoIncrement: true,

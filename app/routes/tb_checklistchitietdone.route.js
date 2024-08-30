@@ -5,7 +5,7 @@ module.exports = (app) => {
     var router = require("express").Router();
   
     router.post("/create",[isAuthenticated], tb_checklistchitietdone.create);
-    router.get("/",[isAuthenticated], tb_checklistchitietdone.getDataFormat);
+    router.get("/:idc", tb_checklistchitietdone.getDataFormat);
 
   
     app.use("/api/tb_checklistchitietdone", router);

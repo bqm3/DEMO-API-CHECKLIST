@@ -22,12 +22,7 @@ exports.create = async (req, res) => {
   try {
     const userData = req.user.data;
     if (userData) {
-      if (
-        !req.body.Checklist ||
-        !req.body.Giatrinhan ||
-        !req.body.ID_Hangmuc ||
-        !req.body.sCalv
-      ) {
+      if (!req.body.Checklist || !req.body.Giatrinhan || !req.body.ID_Hangmuc) {
         res.status(400).json({
           message: "Phải nhập đầy đủ dữ liệu!",
         });
@@ -452,27 +447,6 @@ exports.update = async (req, res) => {
         });
       }
 
-      let sCalv = req.body.sCalv;
-
-      // Đảo ngược mảng sCalv
-      sCalv = sCalv.reverse();
-
-      // Lấy các ID_Calv từ mảng sCalv
-      const idCalvArray = sCalv.map((id) => parseInt(id, 10));
-
-      // Truy vấn cơ sở dữ liệu để lấy các giá trị isDelete của ID_Calv trong ent_calv
-      const calvData = await Ent_calv.findAll({
-        where: {
-          ID_Calv: idCalvArray,
-        },
-        attributes: ["ID_Calv", "isDelete"],
-      });
-
-      // Lọc các ID_Calv mà có isDelete = 0
-      const validCalv = calvData
-        .filter((calv) => `${calv.isDelete}` === "0")
-        .map((calv) => calv.ID_Calv);
-
       // Chuẩn bị dữ liệu để cập nhật
       const reqData = {
         ID_Khuvuc: req.body.ID_Khuvuc,
@@ -487,11 +461,11 @@ exports.update = async (req, res) => {
         Giatrinhan: req.body.Giatrinhan || "",
         isCheck: req.body.isCheck,
         Tieuchuan: req.body.Tieuchuan || "",
-        sCalv: JSON.stringify(validCalv) || null,
-        calv_1: JSON.stringify(validCalv[0]) || null,
-        calv_2: JSON.stringify(validCalv[1]) || null,
-        calv_3: JSON.stringify(validCalv[2]) || null,
-        calv_4: JSON.stringify(validCalv[3]) || null,
+        // sCalv: JSON.stringify(validCalv) || null,
+        // calv_1: JSON.stringify(validCalv[0]) || null,
+        // calv_2: JSON.stringify(validCalv[1]) || null,
+        // calv_3: JSON.stringify(validCalv[2]) || null,
+        // calv_4: JSON.stringify(validCalv[3]) || null,
         isDelete: 0,
         isImportant: req.body.isImportant || 0,
       };
@@ -550,6 +524,38 @@ exports.delete = async (req, res) => {
   }
 };
 
+exports.deleteMul = async (req, res) => {
+  try {
+    const userData = req.user.data;
+    const deleteRows = req.body;
+    const idsToDelete = deleteRows.map((row) => row.ID_Checklist);
+    if (userData) {
+      Ent_checklist.update(
+        { isDelete: 1 },
+        {
+          where: {
+            ID_Checklist: idsToDelete,
+          },
+        }
+      )
+        .then((data) => {
+          res.status(200).json({
+            message: "Xóa checklist thành công!",
+          });
+        })
+        .catch((err) => {
+          res.status(500).json({
+            message: err.message || "Lỗi! Vui lòng thử lại sau.",
+          });
+        });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      message: err.message || "Lỗi! Vui lòng thử lại sau.",
+    });
+  }
+};
+
 // filter data
 exports.getFilter = async (req, res) => {
   try {
@@ -592,46 +598,51 @@ exports.getFilter = async (req, res) => {
       });
 
       const arrPush = [];
-
-      // Duyệt qua từng phần tử trong mảng checklistDoneItems
       checklistDoneItems.forEach((item) => {
-        // Chuyển đổi chuỗi JSON thành một đối tượng JavaScript
-        const descriptionArray = JSON.parse(item.dataValues.Description);
-
-        // Lặp qua mỗi phần tử của mảng descriptionArray
-        descriptionArray.forEach((description) => {
-          // Tách các mục dữ liệu trước dấu phẩy (,)
-          const splitByComma = description.split(",");
-
-          // Lặp qua mỗi phần tử sau khi tách
-          splitByComma.forEach((splitItem) => {
-            // Trích xuất thông tin từ mỗi chuỗi
-            const [ID_Checklist, valueCheck, gioht] = splitItem.split("/");
-            // Kiểm tra điều kiện và thêm vào mảng arrPush nếu điều kiện đúng
-            arrPush.push({
-              ID_Checklist: parseInt(ID_Checklist),
-              valueCheck: valueCheck,
-              gioht: gioht,
-            });
+        const idChecklists = item.Description.split(",").map(Number); 
+        if (idChecklists.length > 0) {
+          idChecklists.map((it) => {
+            if (Number(item.ID_ChecklistC) === Number(req.params.idc)) {
+              arrPush.push({
+                ID_ChecklistC: parseInt(item.ID_ChecklistC),
+                ID_Checklist: it,
+                Gioht: item.Gioht,
+              });
+            }
           });
-        });
+        }
       });
+      // // Duyệt qua từng phần tử trong mảng checklistDoneItems
+      // checklistDoneItems.forEach((item) => {
+      //   // Chuyển đổi chuỗi JSON thành một đối tượng JavaScript
+      //   const descriptionArray = JSON.parse(item.dataValues.Description);
+
+      //   // Lặp qua mỗi phần tử của mảng descriptionArray
+      //   descriptionArray.forEach((description) => {
+      //     // Tách các mục dữ liệu trước dấu phẩy (,)
+      //     const splitByComma = description.split(",");
+
+      //     // Lặp qua mỗi phần tử sau khi tách
+      //     splitByComma.forEach((splitItem) => {
+      //       // Trích xuất thông tin từ mỗi chuỗi
+      //       const [ID_Checklist, valueCheck, gioht] = splitItem.split("/");
+      //       // Kiểm tra điều kiện và thêm vào mảng arrPush nếu điều kiện đúng
+      //       arrPush.push({
+      //         ID_Checklist: parseInt(ID_Checklist),
+      //         valueCheck: valueCheck,
+      //         gioht: gioht,
+      //       });
+      //     });
+      //   });
+      // });
 
       const checklistIds = checklistItems.map((item) => item.ID_Checklist);
       const checklistDoneIds = arrPush.map((item) => item.ID_Checklist);
 
       let whereCondition = {
         isDelete: 0,
-        ID_Hangmuc,
-        [Op.or]: [
-          { calv_1: ID_Calv },
-          { calv_2: ID_Calv },
-          { calv_3: ID_Calv },
-          { calv_4: ID_Calv },
-        ],
       };
       whereCondition["$ent_khuvuc.ent_toanha.ID_Duan$"] = userData?.ID_Duan;
-      whereCondition["$ent_hangmuc.ID_KhoiCV$"] = ID_KhoiCV;
 
       if (
         checklistIds &&
@@ -687,27 +698,45 @@ exports.getFilter = async (req, res) => {
               "ID_KhoiCV",
               "FileTieuChuan",
             ],
+          },
+          {
+            model: Ent_khuvuc,
+            attributes: [
+              "ID_Toanha",
+              "ID_Khuvuc",
+              "Sothutu",
+              "MaQrCode",
+              "ID_KhoiCVs",
+              "Tenkhuvuc",
+              "ID_User",
+              "isDelete",
+            ],
+            where: {
+              isDelete: 0,
+            },
             include: [
               {
-                model: Ent_khuvuc,
-                attributes: [
-                  "Tenkhuvuc",
-                  "MaQrCode",
-                  "Makhuvuc",
-                  "Sothutu",
-                  "ID_Toanha",
-                  "ID_KhoiCV",
-                ],
+                model: Ent_khuvuc_khoicv,
+                attributes: ["ID_KV_CV", "ID_Khuvuc","ID_KhoiCV"],
                 include: [
-                  {
-                    model: Ent_toanha,
-                    attributes: ["Toanha"],
-                  },
                   {
                     model: Ent_khoicv,
                     attributes: ["KhoiCV", "Ngaybatdau", "Chuky"],
-                  },
+                  }
+                ]
+              },
+              {
+                model: Ent_toanha,
+                attributes: [
+                  "ID_Toanha",
+                  "ID_Duan",
+                  "Toanha",
+                  "Sotang",
+                  "isDelete",
                 ],
+                where: {
+                  isDelete: 0,
+                },
               },
             ],
           },
@@ -808,49 +837,30 @@ exports.getChecklist = async (req, res) => {
     });
 
     const arrPush = [];
-
-    // Duyệt qua từng phần tử trong mảng checklistDoneItems
-    if (checklistDoneItems.length > 0) {
       checklistDoneItems.forEach((item) => {
-        // Chuyển đổi chuỗi JSON thành một đối tượng JavaScript
-        const descriptionArray = JSON.parse(item.dataValues.Description);
-
-        // Kiểm tra xem descriptionArray có phải là mảng hay không
-        if (Array.isArray(descriptionArray)) {
-          // Nếu là mảng, thực hiện xử lý như trong mã của bạn
-          descriptionArray.forEach((description) => {
-            // Tách các mục dữ liệu trước dấu phẩy (,)
-            const splitByComma = description.split(",");
-
-            // Lặp qua mỗi phần tử sau khi tách
-            splitByComma.forEach((splitItem) => {
-              // Trích xuất thông tin từ mỗi chuỗi
-              const [ID_Checklist, valueCheck, gioht] = splitItem.split("/");
-
-              // Kiểm tra điều kiện và thêm vào mảng arrPush nếu điều kiện đúng
+        const idChecklists = item.Description.split(",").map(Number); 
+        if (idChecklists.length > 0) {
+          idChecklists.map((it) => {
+            if (Number(item.ID_ChecklistC) === Number(req.params.idc)) {
               arrPush.push({
-                ID_Checklist: parseInt(ID_Checklist),
-                valueCheck: valueCheck,
-                gioht: gioht,
+                ID_ChecklistC: parseInt(item.ID_ChecklistC),
+                ID_Checklist: it,
+                Gioht: item.Gioht,
               });
-            });
+            }
           });
-        } else {
-          console.log("descriptionArray không phải là một mảng.");
         }
       });
-    }
 
     const checklistIds = checklistItems.map((item) => item?.ID_Checklist) || [];
     const checklistDoneIds = arrPush.map((item) => item?.ID_Checklist) || [];
 
     let whereCondition = {
       isDelete: 0,
-      ID_Hangmuc,
       [Op.or]: { sCalv: { [Op.like]: `%${ID_Calv}%` } },
     };
 
-    whereCondition["$ent_hangmuc.ent_khuvuc.ent_toanha.ID_Duan$"] =
+    whereCondition["$ent_khuvuc.ent_toanha.ID_Duan$"] =
       userData?.ID_Duan;
     // whereCondition["$ent_hangmuc.ID_KhoiCV$"] = userData?.ID_KhoiCV;
 
@@ -959,8 +969,8 @@ exports.getChecklist = async (req, res) => {
                 },
               ],
               where: {
-                ID_KhoiCV: userData?.ID_KhoiCV
-              }
+                ID_KhoiCV: userData?.ID_KhoiCV,
+              },
             },
           ],
         },
@@ -1170,7 +1180,6 @@ exports.getFilterSearch = async (req, res) => {
             "MaQrCode",
             "FileTieuChuan",
           ],
-         
         },
         {
           model: Ent_khuvuc,
@@ -1292,38 +1301,20 @@ exports.filterChecklists = async (req, res) => {
     });
 
     const arrPush = [];
-
-    // Duyệt qua từng phần tử trong mảng checklistDoneItems
-    if (checklistDoneItems.length > 0) {
       checklistDoneItems.forEach((item) => {
-        // Chuyển đổi chuỗi JSON thành một đối tượng JavaScript
-        const descriptionArray = JSON.parse(item.dataValues.Description);
-
-        // Kiểm tra xem descriptionArray có phải là mảng hay không
-        if (Array.isArray(descriptionArray)) {
-          // Nếu là mảng, thực hiện xử lý như trong mã của bạn
-          descriptionArray.forEach((description) => {
-            // Tách các mục dữ liệu trước dấu phẩy (,)
-            const splitByComma = description.split(",");
-
-            // Lặp qua mỗi phần tử sau khi tách
-            splitByComma.forEach((splitItem) => {
-              // Trích xuất thông tin từ mỗi chuỗi
-              const [ID_Checklist, valueCheck, gioht] = splitItem.split("/");
-
-              // Kiểm tra điều kiện và thêm vào mảng arrPush nếu điều kiện đúng
+        const idChecklists = item.Description.split(",").map(Number); 
+        if (idChecklists.length > 0) {
+          idChecklists.map((it) => {
+            if (Number(item.ID_ChecklistC) === Number(req.params.idc)) {
               arrPush.push({
-                ID_Checklist: parseInt(ID_Checklist),
-                valueCheck: valueCheck,
-                gioht: gioht,
+                ID_ChecklistC: parseInt(item.ID_ChecklistC),
+                ID_Checklist: it,
+                Gioht: item.Gioht,
               });
-            });
+            }
           });
-        } else {
-          console.log("descriptionArray không phải là một mảng.");
         }
       });
-    }
 
     const checklistIds =
       checklistItems
@@ -1337,12 +1328,11 @@ exports.filterChecklists = async (req, res) => {
     let whereCondition = {
       isDelete: 0,
       ID_Hangmuc: {
-        [Op.in]: ID_Hangmucs
+        [Op.in]: ID_Hangmucs,
       },
     };
 
-    whereCondition["$ent_khuvuc.ent_toanha.ID_Duan$"] =
-      userData?.ID_Duan;
+    whereCondition["$ent_khuvuc.ent_toanha.ID_Duan$"] = userData?.ID_Duan;
     // whereCondition["$ent_hangmuc.ID_KhoiCV$"] = userData?.ID_KhoiCV;
 
     if (
@@ -1409,11 +1399,11 @@ exports.filterChecklists = async (req, res) => {
             "MaQrCode",
             "FileTieuChuan",
           ],
-          where:{
+          where: {
             ID_Hangmuc: {
-              [Op.in]: tbChecklist.ID_Hangmucs
-            }
-          }
+              [Op.in]: tbChecklist.ID_Hangmucs,
+            },
+          },
         },
         {
           model: Ent_khuvuc,
@@ -1452,8 +1442,8 @@ exports.filterChecklists = async (req, res) => {
                 },
               ],
               where: {
-                ID_KhoiCV: userData?.ID_KhoiCV
-              }
+                ID_KhoiCV: userData?.ID_KhoiCV,
+              },
             },
           ],
         },
@@ -1504,38 +1494,35 @@ exports.filterChecklists = async (req, res) => {
   }
 };
 
-exports.KhuvucChecklists = async (req, res) => {
+exports.filterReturn = async (req, res) => {
   try {
     const userData = req.user.data;
     const ID_ChecklistC = req.params.idc;
-    const ID_Calv = req.params.id_calv;
-    const ID_Hangmuc = req.body.ID_Hangmuc;
+    const ID_ThietLapCa = req.params.id_calv;
 
     const tbChecklist = await Tb_checklistc.findByPk(ID_ChecklistC, {
-      attributes: ["ID_Khuvucs", "isDelete"],
+      attributes: ["ID_Hangmucs", "isDelete", "ID_ThietLapCa"],
       where: {
         isDelete: 0,
+        ID_ThietLapCa: ID_ThietLapCa
       },
     });
 
     let whereCondition = {
-      isDelete: 0,
-      ID_Hangmuc,
-      [Op.or]: { sCalv: { [Op.like]: `%${ID_Calv}%` } },
+      isDelete: 0
     };
 
     if (
-      Array.isArray(tbChecklist.ID_Khuvucs) &&
-      tbChecklist.ID_Khuvucs.length > 0
+      Array.isArray(tbChecklist.ID_Hangmucs) &&
+      tbChecklist.ID_Hangmucs.length > 0
     ) {
-      whereCondition.ID_Khuvuc = {
-        [Op.in]: tbChecklist.ID_Khuvucs,
+      whereCondition.ID_Hangmuc = {
+        [Op.in]: tbChecklist.ID_Hangmucs,
       };
     }
 
-    whereCondition["$ent_hangmuc.ent_khuvuc.ent_toanha.ID_Duan$"] =
+    whereCondition["$ent_khuvuc.ent_toanha.ID_Duan$"] =
       userData?.ID_Duan;
-    whereCondition["$ent_hangmuc.ID_KhoiCV$"] = userData?.ID_KhoiCV;
 
     const checklistData = await Ent_checklist.findAll({
       attributes: [
@@ -1572,7 +1559,6 @@ exports.KhuvucChecklists = async (req, res) => {
             "MaQrCode",
             "FileTieuChuan",
           ],
-        
         },
         {
           model: Ent_khuvuc,

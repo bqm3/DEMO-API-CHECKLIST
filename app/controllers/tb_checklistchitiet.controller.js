@@ -540,10 +540,6 @@ exports.searchChecklist = async (req, res) => {
                 attributes: ["KhoiCV", "Ngaybatdau", "Chuky"],
               },
               {
-                model: Ent_giamsat,
-                attributes: ["Hoten"],
-              },
-              {
                 model: Ent_duan,
                 attributes: ["Duan"],
               },
@@ -634,10 +630,7 @@ exports.searchChecklist = async (req, res) => {
                 model: Ent_khoicv,
                 attributes: ["KhoiCV", "Ngaybatdau", "Chuky"],
               },
-              {
-                model: Ent_giamsat,
-                attributes: ["Hoten"],
-              },
+             
               {
                 model: Ent_duan,
                 attributes: ["Duan"],
@@ -699,7 +692,7 @@ exports.searchChecklist = async (req, res) => {
           [Op.and]: [orConditions],
         },
         order: [
-          [{ model: Tb_checklistc }, "Ngay", "DESC"],
+          [ "Ngay", "DESC"],
           ["Gioht", "DESC"],
         ],
         limit: pageSize,
@@ -1014,7 +1007,7 @@ cron.schedule("0 * * * *", async function () {
     const results = await Tb_checklistchitiet.findAll({
       attributes: [
         "ID_ChecklistC",
-        "ID_ChecklistChitiet",
+        "ID_Checklistchitiet",
         "ID_Checklist",
         "Ketqua",
         "Anh",
@@ -1047,7 +1040,7 @@ cron.schedule("0 * * * *", async function () {
 
     // Xóa các bản ghi trùng lặp và cập nhật số lượng đã xóa
     const deletePromises = duplicates.map(record => 
-      Tb_checklistchitiet.destroy({ where: { ID_ChecklistChitiet: record.ID_ChecklistChitiet } })
+      Tb_checklistchitiet.destroy({ where: { ID_Checklistchitiet: record.ID_Checklistchitiet } })
     );
     await Promise.all(deletePromises);
 

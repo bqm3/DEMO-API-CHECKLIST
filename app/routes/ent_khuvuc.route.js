@@ -14,6 +14,7 @@ module.exports = (app) => {
   router.get("/:id", [isAuthenticated], ent_khuvuc.getDetail);
   router.put("/delete/:id",[isAuthenticated], ent_khuvuc.delete);
   router.put("/update/:id",[isAuthenticated], ent_khuvuc.update);
+  router.put("/delete-mul", [isAuthenticated], ent_khuvuc.deleteMul)
   // router.post("/filter_qr", [isAuthenticated], ent_khuvuc.filterByQr)
 
   router.post("/uploads", [isAuthenticated, upload.single('files')], ent_khuvuc.uploadFiles)

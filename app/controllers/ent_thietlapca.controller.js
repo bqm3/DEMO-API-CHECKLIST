@@ -114,8 +114,45 @@ exports.get = async (req, res) => {
 exports.getDetail = async (req, res) => {
   try {
     const userData = req.user.data;
-    if (req.params.id && userData) {
-      const khuvucDetail = await Ent_khuvuc.findByPk(req.params.id, {
+    const ID_ThietLapCa = req.params.id;
+
+    // Điều kiện để tìm kiếm theo ID_ThietLapCa
+    let whereCondition = {
+      isDelete: 0,
+      ID_Duan: userData?.ID_Duan,
+    };
+
+    if (userData) {
+      // Truy vấn để lấy dữ liệu từ Ent_thietlapca
+      const thietlapca = await Ent_thietlapca.findByPk(ID_ThietLapCa, {
+        attributes: [
+          "ID_Duan",
+          "ID_Calv",
+          "Ngaythu",
+          "ID_Hangmucs",
+          "ID_ThietLapCa",
+          "isDelete",
+        ],
+        include: [
+          {
+            model: Ent_calv,
+            attributes: [
+              "Tenca", "ID_KhoiCV"
+            ]
+          }
+        ],
+        where: whereCondition, 
+      });
+
+      // Kiểm tra xem thietlapca có tồn tại không
+      if (!thietlapca) {
+        return res.status(404).json({
+          message: "Không tìm thấy thiết lập ca với ID này.",
+        });
+      }
+
+      // Truy vấn Ent_khuvuc dựa trên ID_Hangmucs lấy được từ thietlapca
+      const khuvucData = await Ent_khuvuc.findAll({
         attributes: [
           "ID_Khuvuc",
           "ID_Toanha",
@@ -142,55 +179,43 @@ exports.getDetail = async (req, res) => {
               },
             ],
           },
+          {
+            model: Ent_hangmuc,
+            as: "ent_hangmuc",
+            attributes: [
+              "ID_Hangmuc",
+              "ID_Khuvuc",
+              "MaQrCode",
+              "Hangmuc",
+              "Tieuchuankt",
+              "FileTieuChuan",
+              "isDelete",
+            ],
+            where: {
+              ID_Hangmuc: {
+                [Op.in]: thietlapca.ID_Hangmucs,
+              }, // Lọc theo ID_Hangmucs của thietlapca
+            },
+          },
         ],
-        where: {
-          isDelete: 0,
-        },
       });
 
-      // Check if the data exists
-      if (!khuvucDetail) {
-        return res.status(404).json({
-          message: "Không tìm thấy khu vực!",
-        });
-      }
-
-      // Extract and combine the ID_KhoiCVs from ent_khuvuc_khoicvs
-      const ID_KhoiCVs = khuvucDetail.ent_khuvuc_khoicvs.map(
-        (item) => item.ID_KhoiCV
-      );
-
-      // Prepare the response data
-      const responseData = {
-        ID_Khuvuc: khuvucDetail.ID_Khuvuc,
-        ID_Toanha: khuvucDetail.ID_Toanha,
-        Sothutu: khuvucDetail.Sothutu,
-        Makhuvuc: khuvucDetail.Makhuvuc,
-        MaQrCode: khuvucDetail.MaQrCode,
-        Tenkhuvuc: khuvucDetail.Tenkhuvuc,
-        ID_User: khuvucDetail.ID_User,
-        isDelete: khuvucDetail.isDelete,
-        ID_KhoiCVs: ID_KhoiCVs,
-        Toanha: khuvucDetail.ent_toanha ? khuvucDetail.ent_toanha.Toanha : null,
-        Sotang: khuvucDetail.ent_toanha ? khuvucDetail.ent_toanha.Sotang : null,
-        Khoicvs: khuvucDetail.ent_khuvuc_khoicvs.map((item) => ({
-          ID_KhoiCV: item.ID_KhoiCV,
-          KhoiCV: item.Ent_khoicv ? item.ent_khoicv.KhoiCV : null,
-        })),
-      };
-
-      // Return the response
+      // Trả về dữ liệu lấy được từ khuvucData
       res.status(200).json({
-        message: "Khu vực chi tiết!",
-        data: responseData,
+        message: "Danh sách thiết lập ca!",
+        data: khuvucData,
+        thietlapca: thietlapca
       });
     }
   } catch (err) {
+    // Xử lý lỗi
     return res.status(500).json({
       message: err.message || "Lỗi! Vui lòng thử lại sau.",
     });
   }
 };
+
+
 
 exports.update = async (req, res) => {
   try {
