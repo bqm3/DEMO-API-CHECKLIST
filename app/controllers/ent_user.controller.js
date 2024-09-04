@@ -45,7 +45,6 @@ exports.login = async (req, res) => {
           model: Ent_chucvu,
           attributes: ["Chucvu"],
         },
-       
       ],
     });
 
@@ -103,17 +102,26 @@ exports.login = async (req, res) => {
 // Create User
 exports.register = async (req, res, next) => {
   try {
-    console.log('req.body.UserName',req.body.UserName, req.body.Password, req.body.ID_Chucvu)
-    if (!req.body.UserName || !req.body.Password || !req.body.ID_Chucvu) {
+    const {
+      UserName,
+      Password,
+      ID_Chucvu,
+      ID_Duan,
+      Hoten,
+      Sodienthoai,
+      Gioitinh,
+      Ngaysinh,
+      ID_KhoiCV,
+      Email,
+    } = req.body;
+    if (!UserName || !Password || !ID_Chucvu) {
       return res.status(400).json({
         message: "Phải nhập đầy đủ dữ liệu.",
       });
     }
-    const UserName = req.body.UserName;
-    const Email = req.body.Email;
     const user = await Ent_user.findOne({
       where: {
-        [Op.or]: [{ UserName: UserName }, { Email: Email }],
+        [Op.and]: [{ UserName: UserName }, { Email: Email }, {ID_Duan: ID_Duan}],
       },
       attributes: [
         "ID_User",
@@ -133,7 +141,6 @@ exports.register = async (req, res, next) => {
           model: Ent_chucvu,
           attributes: ["Chucvu"],
         },
-       
       ],
     });
 
@@ -145,16 +152,16 @@ exports.register = async (req, res, next) => {
 
     const salt = genSaltSync(10);
     var data = {
-      UserName: req.body.UserName,
-      Email: req.body.Email,
-      Password: await hashSync(req.body.Password, salt),
-      ID_Chucvu: req.body.ID_Chucvu,
-      ID_Duan: req.body.ID_Duan || null,
-      Hoten: req.body.Hoten || null,
-      Sodienthoai: req.body.Sodienthoai || null,
-      Gioitinh: req.body.Gioitinh || null,
-      Ngaysinh: req.body.Ngaysinh || null,
-      ID_KhoiCV: (req.body.ID_Chucvu == 1 || req.body.ID_Chucvu == 2) ? null : req.body.ID_KhoiCV,
+      UserName: UserName,
+      Email: Email,
+      Password: await hashSync(Password, salt),
+      ID_Chucvu: ID_Chucvu,
+      ID_Duan: ID_Duan || null,
+      Hoten: Hoten || null,
+      Sodienthoai: Sodienthoai || null,
+      Gioitinh: Gioitinh || null,
+      Ngaysinh: Ngaysinh || null,
+      ID_KhoiCV: ID_Chucvu == 1 || ID_Chucvu == 2 ? null : ID_KhoiCV,
       isDelete: 0,
     };
 
@@ -168,7 +175,7 @@ exports.register = async (req, res, next) => {
         });
       });
   } catch (err) {
-    console.log('err', err)
+    console.log("err", err);
     return res.status(500).json({
       message: err.message || "Lỗi! Vui lòng thử lại sau",
     });
@@ -397,7 +404,7 @@ exports.getDetail = async (req, res) => {
           "ID_User",
           "UserName",
           "Email",
-          
+
           "Password",
           "ID_Duan",
           "ID_KhoiCV",
@@ -454,7 +461,7 @@ exports.checkAuth = async (req, res, next) => {
         "UserName",
         "Email",
         "Password",
-        
+
         "ID_Duan",
         "ID_KhoiCV",
         "deviceToken",
@@ -511,7 +518,7 @@ exports.getGiamSat = async (req, res, next) => {
           "ID_User",
           "UserName",
           "Email",
-          
+
           "Password",
           "ID_Duan",
           "ID_KhoiCV",
@@ -566,7 +573,7 @@ exports.deviceToken = async (req, res, next) => {
           "UserName",
           "Email",
           "Password",
-          
+
           "ID_Duan",
           "ID_KhoiCV",
           "deviceToken",
@@ -661,7 +668,7 @@ exports.notiPush = async (message) => {
         "Password",
         "ID_Duan",
         "ID_KhoiCV",
-        
+
         "ID_Chucvu",
         "isDelete",
       ],

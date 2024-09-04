@@ -599,7 +599,7 @@ exports.getFilter = async (req, res) => {
 
       const arrPush = [];
       checklistDoneItems.forEach((item) => {
-        const idChecklists = item.Description.split(",").map(Number); 
+        const idChecklists = item.Description.split(",").map(Number);
         if (idChecklists.length > 0) {
           idChecklists.map((it) => {
             if (Number(item.ID_ChecklistC) === Number(req.params.idc)) {
@@ -717,13 +717,13 @@ exports.getFilter = async (req, res) => {
             include: [
               {
                 model: Ent_khuvuc_khoicv,
-                attributes: ["ID_KV_CV", "ID_Khuvuc","ID_KhoiCV"],
+                attributes: ["ID_KV_CV", "ID_Khuvuc", "ID_KhoiCV"],
                 include: [
                   {
                     model: Ent_khoicv,
                     attributes: ["KhoiCV", "Ngaybatdau", "Chuky"],
-                  }
-                ]
+                  },
+                ],
               },
               {
                 model: Ent_toanha,
@@ -837,20 +837,20 @@ exports.getChecklist = async (req, res) => {
     });
 
     const arrPush = [];
-      checklistDoneItems.forEach((item) => {
-        const idChecklists = item.Description.split(",").map(Number); 
-        if (idChecklists.length > 0) {
-          idChecklists.map((it) => {
-            if (Number(item.ID_ChecklistC) === Number(req.params.idc)) {
-              arrPush.push({
-                ID_ChecklistC: parseInt(item.ID_ChecklistC),
-                ID_Checklist: it,
-                Gioht: item.Gioht,
-              });
-            }
-          });
-        }
-      });
+    checklistDoneItems.forEach((item) => {
+      const idChecklists = item.Description.split(",").map(Number);
+      if (idChecklists.length > 0) {
+        idChecklists.map((it) => {
+          if (Number(item.ID_ChecklistC) === Number(req.params.idc)) {
+            arrPush.push({
+              ID_ChecklistC: parseInt(item.ID_ChecklistC),
+              ID_Checklist: it,
+              Gioht: item.Gioht,
+            });
+          }
+        });
+      }
+    });
 
     const checklistIds = checklistItems.map((item) => item?.ID_Checklist) || [];
     const checklistDoneIds = arrPush.map((item) => item?.ID_Checklist) || [];
@@ -860,8 +860,7 @@ exports.getChecklist = async (req, res) => {
       [Op.or]: { sCalv: { [Op.like]: `%${ID_Calv}%` } },
     };
 
-    whereCondition["$ent_khuvuc.ent_toanha.ID_Duan$"] =
-      userData?.ID_Duan;
+    whereCondition["$ent_khuvuc.ent_toanha.ID_Duan$"] = userData?.ID_Duan;
     // whereCondition["$ent_hangmuc.ID_KhoiCV$"] = userData?.ID_KhoiCV;
 
     if (
@@ -1301,20 +1300,20 @@ exports.filterChecklists = async (req, res) => {
     });
 
     const arrPush = [];
-      checklistDoneItems.forEach((item) => {
-        const idChecklists = item.Description.split(",").map(Number); 
-        if (idChecklists.length > 0) {
-          idChecklists.map((it) => {
-            if (Number(item.ID_ChecklistC) === Number(req.params.idc)) {
-              arrPush.push({
-                ID_ChecklistC: parseInt(item.ID_ChecklistC),
-                ID_Checklist: it,
-                Gioht: item.Gioht,
-              });
-            }
-          });
-        }
-      });
+    checklistDoneItems.forEach((item) => {
+      const idChecklists = item.Description.split(",").map(Number);
+      if (idChecklists.length > 0) {
+        idChecklists.map((it) => {
+          if (Number(item.ID_ChecklistC) === Number(req.params.idc)) {
+            arrPush.push({
+              ID_ChecklistC: parseInt(item.ID_ChecklistC),
+              ID_Checklist: it,
+              Gioht: item.Gioht,
+            });
+          }
+        });
+      }
+    });
 
     const checklistIds =
       checklistItems
@@ -1504,12 +1503,12 @@ exports.filterReturn = async (req, res) => {
       attributes: ["ID_Hangmucs", "isDelete", "ID_ThietLapCa"],
       where: {
         isDelete: 0,
-        ID_ThietLapCa: ID_ThietLapCa
+        ID_ThietLapCa: ID_ThietLapCa,
       },
     });
 
     let whereCondition = {
-      isDelete: 0
+      isDelete: 0,
     };
 
     if (
@@ -1521,8 +1520,7 @@ exports.filterReturn = async (req, res) => {
       };
     }
 
-    whereCondition["$ent_khuvuc.ent_toanha.ID_Duan$"] =
-      userData?.ID_Duan;
+    whereCondition["$ent_khuvuc.ent_toanha.ID_Duan$"] = userData?.ID_Duan;
 
     const checklistData = await Ent_checklist.findAll({
       attributes: [
@@ -1705,19 +1703,8 @@ exports.getListChecklistWeb = async (req, res) => {
           include: [
             {
               model: Ent_toanha,
-              attributes: ["Toanha", "ID_Toanha"],
-              include: {
-                model: Ent_duan,
-                attributes: [
-                  "ID_Duan",
-                  "Duan",
-                  "Diachi",
-                  "Vido",
-                  "Kinhdo",
-                  "Logo",
-                ],
-                where: { ID_Duan: userData.ID_Duan },
-              },
+              attributes: ["Toanha", "ID_Toanha", "ID_Duan"],
+              where: { ID_Duan: userData.ID_Duan },
             },
             {
               model: Ent_khuvuc_khoicv,
@@ -1942,57 +1929,39 @@ exports.uploadFiles = async (req, res) => {
     const worksheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(worksheet);
 
-    const commonDetailsMap = {};
-
-    data.forEach((item) => {
-      const maChecklist = item["Mã checklist"];
-      if (!commonDetailsMap[maChecklist]) {
-        commonDetailsMap[maChecklist] = {
-          "Tên dự án": item["Tên dự án"],
-          "Tên tòa nhà": item["Tên tòa nhà"],
-          "Mã khu vực": item["Mã khu vực"],
-          "Mã QrCode khu vực": item["Mã QrCode khu vực"],
-          "Tên khu vực": item["Tên khu vực"],
-          "Mã QrCode hạng mục": item["Mã QrCode hạng mục"],
-          "Tên Hạng Mục": item["Tên Hạng Mục"],
-          "Tên tầng": item["Tên tầng"],
-          "Tên khối công việc": item["Tên khối công việc"],
-          "Mã checklist": item["Mã checklist"],
-          STT: item["STT"],
-        };
-      }
-    });
-
-    // Step 2: Update objects with common details
-    const updatedData = data.map((item) => {
-      return {
-        ...item,
-      };
-    });
-
     await sequelize.transaction(async (transaction) => {
+      const removeSpacesFromKeys = (obj) => {
+        return Object.keys(obj).reduce((acc, key) => {
+          const newKey = key?.replace(/\s+/g, "")?.toUpperCase();
+          acc[newKey] = obj[key];
+          return acc;
+        }, {});
+      };
+
       for (const [index, item] of data.entries()) {
         try {
-          const maQrCodeHangMuc = item["Mã QrCode hạng mục"];
-          const tenTang = item["Tên tầng"];
-          const tenKhoiCongViec = item["Tên khối công việc"];
-          const caChecklist = item["Ca checklist"];
-          const sttChecklist = item["STT"];
-          const maChecklist = item["Mã checklist"];
-          const tenChecklist = item["Tên checklist"];
-          const tieuChuanChecklist = item["Tiêu chuẩn checklist"];
-          const giaTriDanhDinh = item["Giá trị danh định"];
-          const cacGiaTriNhan = item["Các giá trị nhận"];
-          const quanTrong = item["Quan trọng"];
-          const ghiChu = item["Ghi chú"];
+          const transformedItem = removeSpacesFromKeys(item);
+          const maQrHangmuc = transformedItem["MÃQRCODEHẠNGMỤC"];
+          const tenHangmuc = transformedItem["TÊNHẠNGMỤC"];
+          const tenTang = transformedItem["TÊNTẦNG"];
+          const tenKhoiCongViec = transformedItem["TÊNKHỐICÔNGVIỆC"];
+          const caChecklist = transformedItem["CACHECKLIST"];
+          const sttChecklist = transformedItem["STT"];
+          const maChecklist = transformedItem["MÃCHECKLIST"];
+          const tenChecklist = transformedItem["TÊNCHECKLIST"];
+          const tieuChuanChecklist = transformedItem["TIÊUCHUẨNCHECKLIST"];
+          const giaTriDanhDinh = transformedItem["GIÁTRỊĐỊNHDANH"];
+          const cacGiaTriNhan = transformedItem["CÁCGIÁTRỊNHẬN"];
+          const quanTrong = transformedItem["QUANTRỌNG"];
+          const ghiChu = transformedItem["GHICHÚ"];
 
           if (!tenChecklist || !caChecklist) {
-            console.log("Skipping due to missing tenChecklist or caChecklist");
+            console.log("Bỏ qua do thiếu tên checklist");
             continue;
           }
 
           if (!tenTang) {
-            console.log("Skipping due to missing tenTang");
+            console.log("Bỏ qua do thiếu tên tầng");
             continue;
           }
 
@@ -2012,7 +1981,6 @@ exports.uploadFiles = async (req, res) => {
                 attributes: [
                   "ID_Toanha",
                   "ID_Khuvuc",
-                  "ID_KhoiCV",
                   "ID_KhoiCVs",
                   "Sothutu",
                   "MaQrCode",
@@ -2025,7 +1993,11 @@ exports.uploadFiles = async (req, res) => {
                 },
               },
             ],
-            where: { MaQrCode: maQrCodeHangMuc, isDelete: 0 },
+            where: {
+              MaQrCode: maQrHangmuc,
+              Hangmuc: tenHangmuc,
+              isDelete: 0,
+            },
             transaction,
           });
 
@@ -2038,7 +2010,7 @@ exports.uploadFiles = async (req, res) => {
                   sequelize.fn("TRIM", sequelize.col("Tentang"))
                 ),
                 "LIKE",
-                +tenTang.trim().toUpperCase()
+                tenTang.trim().toUpperCase()
               ),
               ID_Duan: userData.ID_Duan,
               isDelete: 0,
@@ -2046,35 +2018,6 @@ exports.uploadFiles = async (req, res) => {
             transaction,
           });
 
-          const khoiCV = await Ent_khoicv.findOne({
-            attributes: ["ID_KhoiCV", "KhoiCV", "isDelete"],
-            where: { KhoiCV: tenKhoiCongViec, isDelete: 0 },
-            transaction,
-          });
-
-          if (!caChecklist || !tenChecklist) {
-            console.log(`Bỏ qua`);
-          } else {
-            const caChecklistArray = caChecklist
-              .split(",")
-              .map((ca) => ca.trim());
-            const calv = await Ent_calv.findAll({
-              attributes: [
-                "ID_Calv",
-                "ID_Duan",
-                "ID_KhoiCV",
-                "Tenca",
-                "isDelete",
-              ],
-              where: {
-                TenCa: caChecklistArray,
-                ID_Duan: userData.ID_Duan,
-                ID_KhoiCV: khoiCV.ID_KhoiCV,
-                isDelete: 0,
-              },
-              transaction,
-            });
-            const sCalv = calv.map((calvItem) => calvItem.ID_Calv);
 
             const data = {
               ID_Khuvuc: hangmuc.ID_Khuvuc,
@@ -2090,11 +2033,7 @@ exports.uploadFiles = async (req, res) => {
               Giatrinhan: cacGiaTriNhan || "",
               isImportant: quanTrong !== undefined ? 1 : 0,
               ID_User: userData.ID_User,
-              sCalv: JSON.stringify(sCalv) || null,
-              calv_1: JSON.stringify(sCalv[0]) || null,
-              calv_2: JSON.stringify(sCalv[1]) || null,
-              calv_3: JSON.stringify(sCalv[2]) || null,
-              calv_4: JSON.stringify(sCalv[3]) || null,
+             
               isDelete: 0,
               Tinhtrang: 0,
             };
@@ -2128,10 +2067,8 @@ exports.uploadFiles = async (req, res) => {
                 ID_Khuvuc: hangmuc.ID_Khuvuc,
                 ID_Tang: tang.ID_Tang,
                 ID_Hangmuc: hangmuc.ID_Hangmuc,
-                Tieuchuan: tieuChuanChecklist,
-                Giatridinhdanh: giaTriDanhDinh,
-                Giatrinhan: cacGiaTriNhan,
                 Checklist: tenChecklist,
+                isDelete: 0
               },
               transaction,
             });
@@ -2140,18 +2077,17 @@ exports.uploadFiles = async (req, res) => {
             if (!existingChecklist) {
               await Ent_checklist.create(data, { transaction });
             } else {
-              console.log(`Checklist already exists for row ${index + 1}`);
+              console.log(`Checklist đã có ở dòng ${index + 1}`);
             }
-          }
+          
         } catch (error) {
-          console.error(`Error on row ${index + 1}:`, error);
-          throw new Error(`Error on row ${index + 1}: ${error.message}`);
+          throw new Error(`Lỗi ở dòng ${index + 1}: ${error.message}`);
         }
       }
     });
 
     res.send({
-      message: "File uploaded and data extracted successfully",
+      message: "Upload dữ liệu thành công",
       data,
     });
   } catch (err) {
@@ -2161,8 +2097,3 @@ exports.uploadFiles = async (req, res) => {
   }
 };
 
-function capitalizeEachWord(str) {
-  return str.toLowerCase().replace(/\b\w/g, function (match) {
-    return match.toUpperCase();
-  });
-}

@@ -9,7 +9,6 @@ const { Op } = require("sequelize");
 const sequelize = require("../config/db.config");
 const xlsx = require("xlsx");
 
-
 // Create and Save a new Ent_tang
 exports.create = async (req, res, next) => {
   // Validate request
@@ -91,7 +90,7 @@ exports.get = async (req, res) => {
       orConditions.push({
         "$ent_khuvuc.ent_toanha.ID_Duan$": userData?.ID_Duan,
       });
-      
+
       await Ent_hangmuc.findAll({
         attributes: [
           "ID_Hangmuc",
@@ -122,13 +121,13 @@ exports.get = async (req, res) => {
             include: [
               {
                 model: Ent_khuvuc_khoicv,
-                attributes: ["ID_KV_CV", "ID_Khuvuc","ID_KhoiCV"],
+                attributes: ["ID_KV_CV", "ID_Khuvuc", "ID_KhoiCV"],
                 include: [
                   {
                     model: Ent_khoicv,
                     attributes: ["KhoiCV", "Ngaybatdau", "Chuky"],
-                  }
-                ]
+                  },
+                ],
               },
               {
                 model: Ent_toanha,
@@ -193,7 +192,7 @@ exports.getDetail = async (req, res) => {
           "Tieuchuankt",
           "Important",
           "isDelete",
-          "FileTieuChuan"
+          "FileTieuChuan",
         ],
         include: [
           {
@@ -213,13 +212,13 @@ exports.getDetail = async (req, res) => {
             include: [
               {
                 model: Ent_khuvuc_khoicv,
-                attributes: ["ID_KV_CV", "ID_Khuvuc","ID_KhoiCV"],
+                attributes: ["ID_KV_CV", "ID_Khuvuc", "ID_KhoiCV"],
                 include: [
                   {
                     model: Ent_khoicv,
                     attributes: ["KhoiCV", "Ngaybatdau", "Chuky"],
-                  }
-                ]
+                  },
+                ],
               },
               {
                 model: Ent_toanha,
@@ -427,7 +426,7 @@ exports.filterByKhuvuc = async (req, res) => {
           "Tieuchuankt",
           "Important",
           "isDelete",
-          "FileTieuChuan"
+          "FileTieuChuan",
         ],
         include: [
           {
@@ -449,13 +448,13 @@ exports.filterByKhuvuc = async (req, res) => {
               },
               {
                 model: Ent_khuvuc_khoicv,
-                attributes: ["ID_KV_CV", "ID_Khuvuc","ID_KhoiCV"],
+                attributes: ["ID_KV_CV", "ID_Khuvuc", "ID_KhoiCV"],
                 include: [
                   {
                     model: Ent_khoicv,
                     attributes: ["KhoiCV", "Ngaybatdau", "Chuky"],
-                  }
-                ]
+                  },
+                ],
               },
             ],
           },
@@ -487,7 +486,6 @@ exports.filterByKhuvuc = async (req, res) => {
   }
 };
 
-
 exports.getHangmucTotal = async (req, res) => {
   try {
     const userData = req.user.data;
@@ -509,7 +507,7 @@ exports.getHangmucTotal = async (req, res) => {
         "Tieuchuankt",
         "Important",
         "isDelete",
-        "FileTieuChuan"
+        "FileTieuChuan",
       ],
       include: [
         {
@@ -537,20 +535,19 @@ exports.getHangmucTotal = async (req, res) => {
             },
             {
               model: Ent_khuvuc_khoicv,
-              attributes: ["ID_KV_CV", "ID_Khuvuc","ID_KhoiCV"],
+              attributes: ["ID_KV_CV", "ID_Khuvuc", "ID_KhoiCV"],
               include: [
                 {
                   model: Ent_khoicv,
                   attributes: ["KhoiCV", "Ngaybatdau", "Chuky"],
-                }
-              ]
+                },
+              ],
             },
           ],
           where: {
-            isDelete: 0
-          }
+            isDelete: 0,
+          },
         },
-        
       ],
       where: whereCondition,
     });
@@ -592,7 +589,6 @@ exports.getHangmucTotal = async (req, res) => {
   }
 };
 
-
 exports.uploadFiles = async (req, res) => {
   try {
     if (!req.file) {
@@ -609,105 +605,64 @@ exports.uploadFiles = async (req, res) => {
     const worksheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(worksheet);
 
-    const commonDetailsMap = {};
-
-    data.forEach((item) => {
-      const maChecklist = item["Mã checklist"];
-      if (!commonDetailsMap[maChecklist]) {
-        commonDetailsMap[maChecklist] = {
-          "Tên dự án": item["Tên dự án"],
-          "Tên tòa nhà": item["Tên tòa nhà"],
-          "Mã khu vực": item["Mã khu vực"],
-          "Mã QrCode khu vực": item["Mã QrCode khu vực"],
-          "Tên khu vực": item["Tên khu vực"],
-          "Mã QrCode hạng mục": item["Mã QrCode hạng mục"],
-          "Tên Hạng Mục": item["Tên Hạng Mục"],
-          "Tên tầng": item["Tên tầng"],
-          "Tên khối công việc": item["Tên khối công việc"],
-        };
-      }
-    });
-
-    // Step 2: Update objects with common details
-    const updatedData = data.map((item, index) => {
-     
-      return {
-        ...item,
-      };
-    });
-    
-
     await sequelize.transaction(async (transaction) => {
-      for (const item of updatedData) {
-        const tenKhoiCongViec = item["Tên khối công việc"];
-        const tenKhuvuc = item["Tên khu vực"];
-        const maKhuvuc = item["Mã khu vực"];
-        const maQrKhuvuc = item["Mã QrCode khu vực"];
-        const maQrHangmuc = item["Mã QrCode hạng mục"];
-        const tenHangmuc = item["Tên Hạng Mục"];
-        const tenTang = item["Tên tầng"];
+      const removeSpacesFromKeys = (obj) => {
+        return Object.keys(obj).reduce((acc, key) => {
+          const newKey = key?.replace(/\s+/g, "")?.toUpperCase();
+          acc[newKey] = obj[key];
+          return acc;
+        }, {});
+      };
 
+      for (const item of data) {
+        const transformedItem = removeSpacesFromKeys(item);
+        const tenKhuvuc = transformedItem["TÊNKHUVỰC"];
+        const maQrKhuvuc = transformedItem["MÃQRCODEKHUVỰC"];
+        const maQrHangmuc = transformedItem["MÃQRCODEHẠNGMỤC"];
+        const tenHangmuc = transformedItem["TÊNHẠNGMỤC"];
 
         const khuVuc = await Ent_khuvuc.findOne({
-          attributes: [
-            "ID_Khuvuc",
-            "MaQrCode",
-            "Tenkhuvuc",
-            "isDelete"
-          ],
+          attributes: ["ID_Khuvuc", "MaQrCode", "Tenkhuvuc", "isDelete"],
           where: {
-            MaQrCode: {
-              [Op.eq]: maQrKhuvuc,
-            },
-            isDelete: 0
+            MaQrCode: maQrKhuvuc,
+            Tenkhuvuc: tenKhuvuc,
+            isDelete: 0,
           },
           transaction,
         });
         if (!khuVuc) {
-          console.log(`Khu vực with MaQrCode ${maQrKhuvuc} not found or is deleted.`);
-          continue;  // Skip the current iteration and move to the next item
+          console.log(`Khu vực với MaQrCode ${maQrKhuvuc} không tìm thấy`);
+          continue; // Skip the current iteration and move to the next item
         }
-
-        const khoiCV = await Ent_khoicv.findOne({
-          attributes: ["ID_KhoiCV", "KhoiCV"],
-          where: {
-            KhoiCV: sequelize.where(
-              sequelize.fn("UPPER", sequelize.col("KhoiCV")),
-              "LIKE",
-              tenKhoiCongViec.toUpperCase()
-            )
-          },
-          transaction,
-        });
 
         // Check if tenKhuvuc already exists in the database
         const existingHangMuc = await Ent_hangmuc.findOne({
           attributes: ["ID_Hangmuc", "Hangmuc", "MaQrCode", "ID_Khuvuc"],
           where: {
             [Op.and]: [
-              { Hangmuc: tenHangmuc.toUpperCase() },
-              { MaQrCode: maQrHangmuc.toUpperCase() },
+              { Hangmuc: tenHangmuc },
+              { MaQrCode: maQrHangmuc },
               { ID_Khuvuc: khuVuc.ID_Khuvuc },
-              {isDelete: 0}
+              { isDelete: 0 },
             ],
-            
           },
           transaction,
         });
 
-
-        if (!existingHangMuc || !khuVuc || !khoiCV) {
+        if (!existingHangMuc || !khuVuc) {
           // If tenKhuvuc doesn't exist, create a new entry
           const dataInsert = {
             ID_Khuvuc: khuVuc.ID_Khuvuc,
             MaQrCode: maQrHangmuc,
             Hangmuc: tenHangmuc,
-            isDelete: 0
+            isDelete: 0,
           };
 
           await Ent_hangmuc.create(dataInsert, { transaction });
         } else {
-          console.log(`Hang muc "${tenHangmuc}" đã tồn tại, bỏ qua việc tạo mới.`);
+          console.log(
+            `Hang muc "${tenHangmuc}" đã tồn tại, bỏ qua việc tạo mới.`
+          );
         }
       }
     });
@@ -717,7 +672,7 @@ exports.uploadFiles = async (req, res) => {
       data,
     });
   } catch (err) {
-    console.log('err', err)
+    console.log("err", err);
     return res.status(500).json({
       message: err.message || "Lỗi! Vui lòng thử lại sau.",
     });

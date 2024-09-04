@@ -54,10 +54,9 @@ exports.get = async (req, res) => {
     const userData = req.user.data;
     let whereCondition = {
       isDelete: 0,
-      ID_Duan: userData?.ID_Duan
+      ID_Duan: userData?.ID_Duan,
     };
     if (userData) {
-     
       await Ent_thietlapca.findAll({
         attributes: [
           "ID_Duan",
@@ -75,22 +74,17 @@ exports.get = async (req, res) => {
               {
                 model: Ent_khoicv,
                 attributes: ["KhoiCV", "Ngaybatdau", "Chuky", "ID_KhoiCV"],
-                order: [
-                  ["ID_KhoiCV", "ASC"]
-                ]
-              }
-            ]
+                order: [["ID_KhoiCV", "ASC"]],
+              },
+            ],
           },
           {
             model: Ent_duan,
-            attributes: ["Duan"]
-          }
+            attributes: ["Duan"],
+          },
         ],
         where: whereCondition,
-        order: [
-          ["Ngaythu", "ASC"],
-          
-        ],
+        order: [["Ngaythu", "ASC"]],
       })
         .then((data) => {
           res.status(200).json({
@@ -136,12 +130,10 @@ exports.getDetail = async (req, res) => {
         include: [
           {
             model: Ent_calv,
-            attributes: [
-              "Tenca", "ID_KhoiCV"
-            ]
-          }
+            attributes: ["Tenca", "ID_KhoiCV"],
+          },
         ],
-        where: whereCondition, 
+        where: whereCondition,
       });
 
       // Kiểm tra xem thietlapca có tồn tại không
@@ -204,7 +196,7 @@ exports.getDetail = async (req, res) => {
       res.status(200).json({
         message: "Danh sách thiết lập ca!",
         data: khuvucData,
-        thietlapca: thietlapca
+        thietlapca: thietlapca,
       });
     }
   } catch (err) {
@@ -215,76 +207,41 @@ exports.getDetail = async (req, res) => {
   }
 };
 
-
-
 exports.update = async (req, res) => {
   try {
+    const ID_ThietLapCa = req.params.id;
     const userData = req.user.data;
-    if (req.params.id && userData) {
-      const { ID_Toanha, Sothutu, Makhuvuc, MaQrCode, Tenkhuvuc, ID_KhoiCVs } =
-        req.body;
-
-      const reqData = {
-        ID_Toanha,
-        Sothutu,
-        Makhuvuc,
-        MaQrCode,
-        ID_KhoiCVs,
-        Tenkhuvuc,
-        ID_User: userData.ID_User,
-        isDelete: 0,
-      };
-
-      // Check if the MaQrCode is not empty and not null
-      if (MaQrCode && MaQrCode.trim() !== "") {
-        // Check if the MaQrCode is already taken by another record
-        const existingKhuvuc = await Ent_khuvuc.findOne({
-          where: {
-            [Op.and]: [
-              { MaQrCode: { [Op.not]: null, [Op.ne]: "" } },
-              { ID_Khuvuc: { [Op.ne]: req.params.id } },
-              { MaQrCode: MaQrCode },
-            ],
-          },
-        });
-
-        if (existingKhuvuc) {
-          return res.status(400).json({
-            message: "Mã QR Code đã tồn tại!",
-          });
-        }
-      }
-
-      // Update the ent_khuvuc record
-      await Ent_khuvuc.update(reqData, {
-        where: { ID_Khuvuc: req.params.id },
-      });
-
-      // If ID_KhoiCVs is provided, update ent_khuvuc_khoicv records
-      if (Array.isArray(ID_KhoiCVs) && ID_KhoiCVs.length > 0) {
-        // Delete old assignments for this khu vực
-        await Ent_khuvuc_khoicv.destroy({
-          where: { ID_Khuvuc: req.params.id },
-        });
-
-        // Create new assignments based on the provided ID_KhoiCVs
-        const assignments = ID_KhoiCVs.map((ID_KhoiCV) => ({
-          ID_Khuvuc: req.params.id,
-          ID_KhoiCV,
-        }));
-
-        await Ent_khuvuc_khoicv.bulkCreate(assignments);
-      }
-
-      // Respond with success message
-      res.status(200).json({
-        message: "Cập nhật khu vực thành công!",
-      });
-    } else {
-      res.status(400).json({
-        message: "Thiếu dữ liệu người dùng hoặc ID khu vực không hợp lệ!",
+    const { ID_KhoiCV, ID_Calv, Ngaythu, ID_Hangmucs, Sochecklist } = req.body;
+    if (!ID_Calv || !ID_Hangmucs) {
+      return res.status(400).json({
+        message: "Phải nhập đầy đủ dữ liệu!",
       });
     }
+
+    Ent_thietlapca.update(
+      {
+        ID_Duan: userData.ID_Duan,
+        ID_Calv: ID_Calv,
+        Ngaythu: Ngaythu,
+        ID_Hangmucs: ID_Hangmucs,
+        Sochecklist: Sochecklist,
+      },
+      {
+        where: {
+          ID_ThietLapCa: ID_ThietLapCa,
+        },
+      }
+    ) .then((data) => {
+      res.status(200).json({
+        message: "Cập nhật tòa nhà thành công!!!",
+        data: data,
+      });
+    })
+    .catch((err) => {
+      res.status(500).json({
+        message: err.message || "Lỗi! Vui lòng thử lại sau.",
+      });
+    })
   } catch (error) {
     res.status(500).json({
       message: error.message || "Lỗi! Vui lòng thử lại sau.",

@@ -403,7 +403,7 @@ exports.getKhuVucFilter = async (req, res) => {
           //   ID_KhoiCV: userData.ID_KhoiCV,
           // });
 
-        //   // Replace Op.contains with Op.like for MySQL (adjust according to your DB)
+          //   // Replace Op.contains with Op.like for MySQL (adjust according to your DB)
         }
 
         // Add ID_Toanha condition if it exists in request body
@@ -481,79 +481,6 @@ exports.getKhuVucFilter = async (req, res) => {
     });
   }
 };
-
-// exports.filterByQr = async (req, res) => {
-//   try {
-//     const userData = req.user.data;
-
-//     if (userData) {
-//       // Xây dựng điều kiện where dựa trên các giá trị đã kiểm tra
-//       const whereCondition = {
-//         [Op.and]: [],
-//       };
-
-//       if (userData.Permission === 3 || userData.UserName === "PSH") {
-//         // Nếu userData.Permission == 1, không cần thêm điều kiện where, lấy tất cả khu vực
-//       } else {
-//         // Nếu userData.Permission !== 1, thêm điều kiện where theo ID_KhoiCV và ID_Duan
-//         if (userData.ID_Duan !== null) {
-//           whereCondition["$ent_toanha.ID_Duan$"] = userData.ID_Duan;
-//         }
-//         if (userData.ID_KhoiCV !== null) {
-//           whereCondition["$ID_KhoiCV$"] = userData.ID_KhoiCV;
-//         }
-//       }
-//       // Thêm điều kiện isDelete
-//       whereCondition.isDelete = 0;
-//       whereCondition.MaQrCode = req.body.MaQrCode;
-//       Ent_khuvuc.findOne({
-//         attributes: [
-//           "ID_Khuvuc",
-//           "ID_Toanha",
-//           "ID_KhoiCV",
-//           "ID_KhoiCVs",
-//           "MaQrCode",
-//           "Sothutu",
-//           "Makhuvuc",
-//           "Tenkhuvuc",
-//           "ID_User",
-//           "isDelete",
-//         ],
-//         include: [
-//           {
-//             model: Ent_toanha,
-//             attributes: ["Toanha", "Sotang", "ID_Toanha"],
-//           },
-//           {
-//             model: Ent_khoicv,
-//             attributes: ["KhoiCV", "Ngaybatdau", "Chuky"],
-//           },
-//         ],
-//         where: whereCondition,
-//       })
-//         .then((data) => {
-//           res.status(200).json({
-//             message: "Thông tin tòa nhà!",
-//             data: data ? [data] : [],
-//           });
-//         })
-//         .catch((err) => {
-//           res.status(500).json({
-//             message: err.message || "Lỗi! Vui lòng thử lại sau.",
-//           });
-//         });
-//     } else {
-//       // Trả về lỗi nếu không có dữ liệu người dùng hoặc không có ID được cung cấp
-//       return res.status(400).json({
-//         message: "Vui lòng thử lại sau.",
-//       });
-//     }
-//   } catch (error) {
-//     res.status(500).json({
-//       message: error.message || "Lỗi! Vui lòng thử lại sau.",
-//     });
-//   }
-// };
 
 exports.getKhuvucTotal = async (req, res) => {
   try {
@@ -642,7 +569,6 @@ exports.getKhuvucTotal = async (req, res) => {
       });
     });
 
-
     // Convert counts to desired format
     const result = Object.keys(khuvucCounts).map((khoiCV) => ({
       label: khoiCV,
@@ -676,34 +602,6 @@ exports.uploadFiles = async (req, res) => {
     const worksheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(worksheet);
 
-    const commonDetailsMap = {};
-
-    data.forEach((item) => {
-      const maChecklist = item["Mã checklist"];
-      if (!commonDetailsMap[maChecklist]) {
-        commonDetailsMap[maChecklist] = {
-          "Tên dự án": item["Tên dự án"],
-          "Tên tòa nhà": item["Tên tòa nhà"],
-          "Mã khu vực": item["Mã khu vực"],
-          "Mã QrCode khu vực": item["Mã QrCode khu vực"],
-          "Tên khu vực": item["Tên khu vực"],
-          "Mã QrCode hạng mục": item["Mã QrCode hạng mục"],
-          "Tên Hạng Mục": item["Tên Hạng Mục"],
-          "Tên tầng": item["Tên tầng"],
-          "Tên khối công việc": item["Tên khối công việc"],
-        };
-      }
-    });
-
-    // Step 2: Update objects with common details
-    const updatedData = data.map((item) => {
-      // const maChecklist = item["Mã checklist"];
-      return {
-        ...item,
-        // ...commonDetailsMap[maChecklist],
-      };
-    });
-
     await sequelize.transaction(async (transaction) => {
       const removeSpacesFromKeys = (obj) => {
         return Object.keys(obj).reduce((acc, key) => {
@@ -713,7 +611,7 @@ exports.uploadFiles = async (req, res) => {
         }, {});
       };
 
-      for (const item of updatedData) {
+      for (const item of data) {
         const transformedItem = removeSpacesFromKeys(item);
 
         const tenKhoiCongViec = transformedItem["TÊNKHỐICÔNGVIỆC"];
@@ -729,26 +627,37 @@ exports.uploadFiles = async (req, res) => {
           where: {
             Toanha: sanitizedTenToanha,
             ID_Duan: userData.ID_Duan,
+            isDelete: 0
           },
           transaction,
         });
 
-        const khoiCV = await Ent_khoicv.findOne({
-          attributes: ["ID_Khoi", "KhoiCV"],
-          where: {
-            KhoiCV: sequelize.where(
-              sequelize.fn("UPPER", sequelize.col("KhoiCV")),
-              "LIKE",
-              "%" + tenKhoiCongViec.toUpperCase() + "%"
-            ),
-          },
-          transaction,
-        });
+        const khoiCongViecList = tenKhoiCongViec
+          .split(",")
+          .map((khoi) => khoi.trim());
 
-        // Check if tenKhuvuc already exists in the database
+        const khoiCVs = await Promise.all(
+          khoiCongViecList.map(async (khoiCongViec) => {
+            const khoiCV = await Ent_khoicv.findOne({
+              attributes: ["ID_KhoiCV", "KhoiCV"],
+              where: {
+                KhoiCV: sequelize.where(
+                  sequelize.fn("UPPER", sequelize.col("KhoiCV")),
+                  "LIKE",
+                  khoiCongViec.toUpperCase()
+                ),
+              },
+              transaction,
+            });
+
+            return khoiCV ? khoiCV.ID_KhoiCV : null;
+          })
+        );
+        const validKhoiCVs = khoiCVs.filter((id) => id !== null);
+
         const existingKhuVuc = await Ent_khuvuc.findOne({
           attributes: [
-            "ID_KhuVuc",
+            "ID_Khuvuc",
             "Tenkhuvuc",
             "isDelete",
             "ID_Toanha",
@@ -757,38 +666,53 @@ exports.uploadFiles = async (req, res) => {
           where: {
             [Op.and]: [
               where(fn("UPPER", col("Tenkhuvuc")), {
-                [Op.like]: `%${tenKhuvuc}%`,
+                [Op.like]: `${tenKhuvuc.toUpperCase()}`,
               }),
               where(fn("UPPER", col("MaQrCode")), {
-                [Op.like]: `%${maQrKhuvuc}%`,
+                [Op.like]: `${maQrKhuvuc}`,
               }),
             ],
             ID_Toanha: toaNha.ID_Toanha,
             isDelete: 0,
-            ID_User: userData.ID_User,
           },
           transaction,
         });
 
+        let khuVucId;
+
         if (!existingKhuVuc) {
-          // If tenKhuvuc doesn't exist, create a new entry
           const dataInsert = {
             ID_Toanha: toaNha.ID_Toanha,
-            ID_KhoiCV: khoiCV.ID_KhoiCV,
-            ID_KhoiCVs: [khoiCV.ID_KhoiCV],
             Sothutu: 1,
             Makhuvuc: maKhuvuc,
             MaQrCode: maQrKhuvuc,
             Tenkhuvuc: tenKhuvuc,
             ID_User: userData.ID_User,
+            ID_KhoiCVs: validKhoiCVs,
             isDelete: 0,
           };
 
-          await Ent_khuvuc.create(dataInsert, { transaction });
+          const newKhuVuc = await Ent_khuvuc.create(dataInsert, {
+            transaction,
+          });
+          khuVucId = newKhuVuc.ID_Khuvuc;
         } else {
+          khuVucId = existingKhuVuc.ID_Khuvuc;
           console.log(
             `Khu vực "${tenKhuvuc}" đã tồn tại, bỏ qua việc tạo mới.`
           );
+        }
+
+        // Thêm các liên kết giữa khu vực và các khối công việc vào bảng trung gian
+        for (const idKhoiCV of validKhoiCVs) {
+          await Ent_khuvuc_khoicv.findOrCreate({
+            where: {
+              ID_Khuvuc: khuVucId,
+              ID_KhoiCV: idKhoiCV,
+              isDelete: 0,
+            },
+            transaction,
+          });
         }
       }
     });
@@ -798,9 +722,11 @@ exports.uploadFiles = async (req, res) => {
       data,
     });
   } catch (err) {
-    console.log("err", err);
+    console.log("err", err.message);
+    console.error("Error at line", err.stack.split("\n")[1].trim());
     return res.status(500).json({
       message: err.message || "Lỗi! Vui lòng thử lại sau.",
+      error: err.stack, // This will include the stack trace with line numbers
     });
   }
 };

@@ -11,31 +11,42 @@ const Ent_user = require("./ent_user.model");
 const Tb_checklistc = require("./tb_checklistc.model");
 const Tb_checklistchitiet = require("./tb_checklistchitiet.model");
 const Tb_checklistchitietdone = require("./tb_checklistchitietdone.model");
+const Tb_sucongoai = require("./tb_sucongoai.model");
 const Ent_ChecklistReplace = require('./ent_checklistreplace.model')
 const Ent_nhom = require('./ent_nhom.model')
 const Ent_khuvuc_khoicv = require('./ent_khuvuc_khoicv.model')
 const Ent_thietlapca = require('./ent_thietlapca.model')
 
-// Thiet lap ca
-Ent_khoicv.hasMany(Ent_thietlapca, {as: 'ent_khoicv', foreignKey: 'ID_KhoiCV'});
-Ent_thietlapca.belongsTo(Ent_khoicv, {foreignKey: "ID_KhoiCV"})
+// Su co ngoai ===========================================================================
+Ent_khuvuc_khoicv.hasMany(Tb_sucongoai, { as: "ent_khuvuc_khoicv", foreignKey: "ID_KV_CV" });
+Tb_sucongoai.belongsTo(Ent_khuvuc_khoicv, { foreignKey: "ID_KV_CV" })
 
-Ent_calv.hasMany(Ent_thietlapca, {as: 'ent_calv', foreignKey: 'ID_Calv'});
-Ent_thietlapca.belongsTo(Ent_calv, {foreignKey: "ID_Calv"})
+Ent_hangmuc.hasMany(Tb_sucongoai, { as: "ent_hangmuc", foreignKey: "ID_Hangmuc" });
+Tb_sucongoai.belongsTo(Ent_hangmuc, { foreignKey: "ID_Hangmuc" })
 
-Ent_duan.hasMany(Ent_thietlapca, {as: 'ent_duan', foreignKey: 'ID_Duan'});
-Ent_thietlapca.belongsTo(Ent_duan, {foreignKey: "ID_Duan"})
+Ent_user.hasMany(Tb_sucongoai, { as: "ent_user", foreignKey: "ID_Hangmuc" });
+Tb_sucongoai.belongsTo(Ent_user, { foreignKey: "ID_Hangmuc" })
 
-// Du an
+// Thiet lap ca ===========================================================================
+Ent_khoicv.hasMany(Ent_thietlapca, { as: 'ent_khoicv', foreignKey: 'ID_KhoiCV' });
+Ent_thietlapca.belongsTo(Ent_khoicv, { foreignKey: "ID_KhoiCV" })
+
+Ent_calv.hasMany(Ent_thietlapca, { as: 'ent_calv', foreignKey: 'ID_Calv' });
+Ent_thietlapca.belongsTo(Ent_calv, { foreignKey: "ID_Calv" })
+
+Ent_duan.hasMany(Ent_thietlapca, { as: 'ent_duan', foreignKey: 'ID_Duan' });
+Ent_thietlapca.belongsTo(Ent_duan, { foreignKey: "ID_Duan" })
+
+// Du an ===========================================================================
 Ent_nhom.hasMany(Ent_duan, { as: 'ent_duan', foreignKey: 'ID_Nhom' });
-Ent_duan.belongsTo(Ent_nhom, { foreignKey: 'ID_Nhom'});
+Ent_duan.belongsTo(Ent_nhom, { foreignKey: 'ID_Nhom' });
 
 
-// Toa nha
+// Toa nha ===========================================================================
 Ent_duan.hasMany(Ent_toanha, { as: 'ent_toanha', foreignKey: 'ID_Duan' });
-Ent_toanha.belongsTo(Ent_duan, { foreignKey: 'ID_Duan'});
+Ent_toanha.belongsTo(Ent_duan, { foreignKey: 'ID_Duan' });
 
-// Tang
+// Tang ===========================================================================
 Ent_duan.hasMany(Ent_tang, { as: "ent_tang" });
 Ent_tang.belongsTo(Ent_duan, {
   foreignKey: "ID_Duan",
@@ -46,7 +57,7 @@ Ent_tang.belongsTo(Ent_user, {
   foreignKey: "ID_User",
 });
 
-// Khu vuc
+// Khu vuc ===========================================================================
 Ent_user.hasMany(Ent_khuvuc, { foreignKey: 'ID_User' });
 Ent_khuvuc.belongsTo(Ent_user, {
   foreignKey: "ID_User",
@@ -58,13 +69,13 @@ Ent_khuvuc_khoicv.belongsTo(Ent_khuvuc, { foreignKey: 'ID_Khuvuc' });
 Ent_khoicv.hasMany(Ent_khuvuc_khoicv, { foreignKey: 'ID_KhoiCV' });
 Ent_khuvuc_khoicv.belongsTo(Ent_khoicv, { foreignKey: 'ID_KhoiCV' });
 
-Ent_toanha.hasMany(Ent_khuvuc,  { as: 'ent_khuvuc', foreignKey: 'ID_Toanha' });
+Ent_toanha.hasMany(Ent_khuvuc, { as: 'ent_khuvuc', foreignKey: 'ID_Toanha' });
 Ent_khuvuc.belongsTo(Ent_toanha, {
   foreignKey: "ID_Toanha",
 });
 
 
-// Ca lam viec
+// Ca lam viec ===========================================================================
 Ent_duan.hasMany(Ent_calv);
 Ent_calv.belongsTo(Ent_duan, {
   foreignKey: "ID_Duan",
@@ -80,7 +91,7 @@ Ent_calv.belongsTo(Ent_user, {
   foreignKey: "ID_User",
 });
 
-// User
+// User ===========================================================================
 Ent_chucvu.hasMany(Ent_user);
 Ent_user.belongsTo(Ent_chucvu, {
   foreignKey: "ID_Chucvu",
@@ -96,7 +107,7 @@ Ent_user.belongsTo(Ent_khoicv, {
   foreignKey: "ID_KhoiCV",
 });
 
-// Checklist
+// Checklist ===========================================================================
 Ent_khuvuc.hasMany(Ent_checklist);
 Ent_checklist.belongsTo(Ent_khuvuc, {
   foreignKey: "ID_Khuvuc",
@@ -119,20 +130,20 @@ Ent_checklist.belongsTo(Ent_user, {
 });
 
 
-// Checklist Faild
-Ent_checklist.hasMany(Ent_ChecklistReplace, {as: 'ent_checklistreplace', foreignKey: "ID_Checklist"});
+// Checklist Faild ===========================================================================
+Ent_checklist.hasMany(Ent_ChecklistReplace, { as: 'ent_checklistreplace', foreignKey: "ID_Checklist" });
 Ent_ChecklistReplace.belongsTo(Ent_checklist, {
   foreignKey: "ID_Checklist"
 })
 
-// Hạng mục
-Ent_khuvuc.hasMany(Ent_hangmuc,   { as: 'ent_hangmuc', foreignKey: 'ID_Khuvuc' });
+// Hạng mục ===========================================================================
+Ent_khuvuc.hasMany(Ent_hangmuc, { as: 'ent_hangmuc', foreignKey: 'ID_Khuvuc' });
 Ent_hangmuc.belongsTo(Ent_khuvuc, {
   foreignKey: "ID_Khuvuc",
 });
 
 
-//ChecklistC
+//ChecklistC ===========================================================================
 Ent_duan.hasMany(Tb_checklistc);
 Tb_checklistc.belongsTo(Ent_duan, {
   foreignKey: "ID_Duan",
@@ -154,7 +165,7 @@ Tb_checklistc.belongsTo(Ent_calv, {
 });
 
 
-// Checklist Chi tiet
+// Checklist Chi tiet ===========================================================================
 Tb_checklistc.hasMany(Tb_checklistchitiet);
 Tb_checklistchitiet.belongsTo(Tb_checklistc, {
   foreignKey: "ID_ChecklistC",
@@ -165,8 +176,7 @@ Tb_checklistchitiet.belongsTo(Ent_checklist, {
   foreignKey: "ID_Checklist",
 });
 
-// Checklist Chi tiet Done
-
+// Checklist Chi tiet Done ===========================================================================
 Tb_checklistc.hasMany(Tb_checklistchitietdone);
 Tb_checklistchitietdone.belongsTo(Tb_checklistc, {
   foreignKey: "ID_ChecklistC",
@@ -189,5 +199,6 @@ module.exports = {
   Tb_checklistchitiet,
   Tb_checklistchitietdone,
   Ent_nhom,
-  Ent_thietlapca
+  Ent_thietlapca,
+  Tb_sucongoai
 };
