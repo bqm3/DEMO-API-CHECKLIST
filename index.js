@@ -82,6 +82,7 @@ require("./app/routes/ent_chucvu.route")(app);
 require("./app/routes/tb_checklistc.route")(app);
 require("./app/routes/tb_checklistchitiet.route")(app);
 require("./app/routes/tb_checklistchitietdone.route")(app);
+require("./app/routes/ent_duan_khoicv.route")(app);
 
 const PORT = process.env.PORT || 6969;
 app.listen(PORT, () => {

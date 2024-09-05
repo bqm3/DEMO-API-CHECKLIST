@@ -16,6 +16,14 @@ const Ent_ChecklistReplace = require('./ent_checklistreplace.model')
 const Ent_nhom = require('./ent_nhom.model')
 const Ent_khuvuc_khoicv = require('./ent_khuvuc_khoicv.model')
 const Ent_thietlapca = require('./ent_thietlapca.model')
+const Ent_duan_khoicv = require('./ent_duan_khoicv.model')
+
+//Duan an + khoi cv  ====================================================================
+Ent_duan.hasMany(Ent_duan_khoicv, {as: "ent_duan_khoicv",foreignKey: 'ID_Duan'})
+Ent_duan_khoicv.belongsTo(Ent_duan, {foreignKey: "ID_Duan"})
+
+Ent_khoicv.hasMany(Ent_duan_khoicv, {as: "ent_duan_khoicv",foreignKey: 'ID_KhoiCV'})
+Ent_duan_khoicv.belongsTo(Ent_khoicv, {foreignKey: "ID_KhoiCV"})
 
 // Su co ngoai ===========================================================================
 Ent_khuvuc_khoicv.hasMany(Tb_sucongoai, { as: "ent_khuvuc_khoicv", foreignKey: "ID_KV_CV" });
@@ -200,5 +208,6 @@ module.exports = {
   Tb_checklistchitietdone,
   Ent_nhom,
   Ent_thietlapca,
-  Tb_sucongoai
+  Tb_sucongoai,
+  Ent_duan_khoicv
 };

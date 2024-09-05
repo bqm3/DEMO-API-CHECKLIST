@@ -9,6 +9,7 @@ const {
   Ent_khuvuc_khoicv,
   Ent_thietlapca,
   Ent_calv,
+  Ent_duan_khoicv,
 } = require("../models/setup.model");
 const { Op, Sequelize, fn, col, literal, where } = require("sequelize");
 const sequelize = require("../config/db.config");
@@ -131,6 +132,17 @@ exports.getDetail = async (req, res) => {
           {
             model: Ent_calv,
             attributes: ["Tenca", "ID_KhoiCV"],
+          },
+          {
+            model: Ent_duan,
+            attributes: ["Duan", "Logo"],
+            include: [
+              {
+                model: Ent_duan_khoicv,
+                as: "ent_duan_khoicv",
+                attributes: ["ID_KhoiCV", "ID_Duan", "Chuky", "Ngaybatdau"],
+              }
+            ]
           },
         ],
         where: whereCondition,

@@ -6,6 +6,7 @@ const {
   Ent_hangmuc,
   Ent_khuvuc_khoicv,
   Ent_khoicv,
+  Ent_duan_khoicv,
 } = require("../models/setup.model");
 const { Op, Sequelize } = require("sequelize");
 
@@ -58,6 +59,13 @@ exports.get = async (req, res) => {
         include: {
           model: Ent_duan,
           attributes: ["Duan"],
+          include: [
+            {
+              model: Ent_duan_khoicv,
+              as: "ent_duan_khoicv",
+              attributes: ["ID_KhoiCV", "Chuky", "Ngaybatdau"]
+            }
+          ]
         },
         where: whereClause,
         order: [["ID_Duan", "ASC"]],
@@ -98,6 +106,13 @@ exports.getDetail = async (req, res) => {
         include: {
           model: Ent_duan,
           attributes: ["Duan"],
+          include: [
+            {
+              model: Ent_duan_khoicv,
+              as: "ent_duan_khoicv",
+              attributes: ["ID_KhoiCV", "Chuky", "Ngaybatdau"]
+            }
+          ]
         },
         where: whereClause,
         order: [["ID_Duan", "ASC"]],
