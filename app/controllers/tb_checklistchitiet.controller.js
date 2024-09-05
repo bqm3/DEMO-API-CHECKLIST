@@ -734,8 +734,6 @@ exports.searchChecklist = async (req, res) => {
 
 exports.uploadImages = async (req, res) => {
   try {
-    console.log(req.body);
-    console.log(req.files);
     const { body, files } = req;
 
     const uploadedFileIds = [];

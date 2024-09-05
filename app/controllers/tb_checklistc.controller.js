@@ -16,6 +16,7 @@ const {
   Ent_nhom,
   Ent_khuvuc_khoicv,
   Ent_thietlapca,
+  Ent_duan_khoicv,
 } = require("../models/setup.model");
 const { Op, Sequelize } = require("sequelize");
 const { uploadFile } = require("../middleware/auth_google");
@@ -68,9 +69,9 @@ exports.createFirstChecklist = async (req, res, next) => {
       attributes: ["Giobatdau", "Gioketthuc"],
     });
 
-    const khoiData = await Ent_khoicv.findOne({
-      where: { ID_KhoiCV: ID_KhoiCV },
-      attributes: ["KhoiCV", "Ngaybatdau", "Chuky"],
+    const khoiData = await Ent_duan_khoicv.findOne({
+      where: { ID_KhoiCV: ID_KhoiCV, ID_Duan: userData.ID_Duan },
+      attributes: ["Ngaybatdau", "Chuky"],
     });
 
     const formattedDateNow = moment(Ngay).startOf("day").format("YYYY-MM-DD");
