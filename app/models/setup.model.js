@@ -32,8 +32,8 @@ Tb_sucongoai.belongsTo(Ent_khuvuc_khoicv, { foreignKey: "ID_KV_CV" })
 Ent_hangmuc.hasMany(Tb_sucongoai, { as: "ent_hangmuc", foreignKey: "ID_Hangmuc" });
 Tb_sucongoai.belongsTo(Ent_hangmuc, { foreignKey: "ID_Hangmuc" })
 
-Ent_user.hasMany(Tb_sucongoai, { as: "ent_user", foreignKey: "ID_Hangmuc" });
-Tb_sucongoai.belongsTo(Ent_user, { foreignKey: "ID_Hangmuc" })
+Ent_user.hasMany(Tb_sucongoai, { as: "ent_user", foreignKey: "ID_User" });
+Tb_sucongoai.belongsTo(Ent_user, { foreignKey: "ID_User" })
 
 // Thiet lap ca ===========================================================================
 Ent_khoicv.hasMany(Ent_thietlapca, { as: 'ent_khoicv', foreignKey: 'ID_KhoiCV' });

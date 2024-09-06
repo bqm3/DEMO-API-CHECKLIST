@@ -280,7 +280,6 @@ exports.getKhuvucByDuan = async (req, res) => {
   }
 };
 
-
 exports.getThongtinduan = async (req, res) => {
   try {
     const data = await Ent_duan.findAll({

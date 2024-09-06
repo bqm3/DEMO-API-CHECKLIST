@@ -26,6 +26,27 @@ exports.create = async (req, res) => {
       });
     }
 
+    const findKhuvuc = await Ent_thietlapca.findOne({
+      attributes: [
+        "ID_Duan",
+        "ID_Calv",
+        "Ngaythu",
+        "ID_Hangmucs",
+        "ID_ThietLapCa",
+        "isDelete",
+      ],
+      where: {
+        ID_Calv: ID_Calv,
+        Ngaythu: Ngaythu
+      }
+    })
+
+    if(findKhuvuc){
+      return res.status(400).json({
+        message: "Ca làm việc và ngày thực hiện đã tồn tại",
+      });
+    }
+
     if (userData) {
       const data = {
         Ngaythu: Ngaythu,
@@ -265,17 +286,17 @@ exports.delete = async (req, res) => {
   try {
     const userData = req.user.data;
     if (req.params.id && userData) {
-      Ent_khuvuc.update(
+      Ent_thietlapca.update(
         { isDelete: 1 },
         {
           where: {
-            ID_Khuvuc: req.params.id,
+            ID_ThietLapCa: req.params.id,
           },
         }
       )
         .then((data) => {
           res.status(200).json({
-            message: "Xóa khu vực thành công!",
+            message: "Xóa thành công!",
           });
         })
         .catch((err) => {

@@ -9,6 +9,8 @@ module.exports = (app) => {
 
   // Create a new tb_sucongoai
   router.post("/create", [isAuthenticated, upload.any()], tb_sucongoai.create);
+  router.get("/", [isAuthenticated], tb_sucongoai.get);
+  router.put("/status/:id", [isAuthenticated], tb_sucongoai.updateStatus);
 
   app.use("/api/tb_sucongoai", router);
 };

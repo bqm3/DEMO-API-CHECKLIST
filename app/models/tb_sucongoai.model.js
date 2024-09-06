@@ -22,7 +22,7 @@ const Tb_sucongoai = sequelize.define("tb_sucongoai", {
    Ngaysuco: {
      type: DataTypes.DATE,
    },
-   Giocuco: {
+   Giosuco: {
     type: DataTypes.TIME,
    },
    Noidungsuco: {

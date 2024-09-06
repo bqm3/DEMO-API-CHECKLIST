@@ -9,6 +9,7 @@ module.exports = (app) => {
   router.get("/", [isAuthenticated], ent_thietlapca.get);
   router.get("/:id", [isAuthenticated], ent_thietlapca.getDetail);
   router.put("/update/:id", [isAuthenticated], ent_thietlapca.update);
+  router.put("/delete/:id", [isAuthenticated], ent_thietlapca.delete);
   
   app.use("/api/ent_thietlapca", router);
 };
