@@ -121,7 +121,11 @@ exports.register = async (req, res, next) => {
     }
     const user = await Ent_user.findOne({
       where: {
-        [Op.and]: [{ UserName: UserName }, { Email: Email }, {ID_Duan: ID_Duan}],
+        [Op.and]: [
+          { UserName: UserName },
+          { Email: Email },
+          { ID_Duan: ID_Duan },
+        ],
       },
       attributes: [
         "ID_User",
@@ -260,8 +264,17 @@ exports.updateUser = async (req, res) => {
         .json({ message: "Không tìm thấy thông tin người dùng." });
     }
 
-    const { ID_Duan, ID_Chucvu, ID_KhoiCV, UserName, Email, Password } =
-      req.body;
+    const {
+      ID_Duan,
+      ID_Chucvu,
+      ID_KhoiCV,
+      UserName,
+      Email,
+      Password,
+      Hoten,
+      Sodienthoai,
+      Gioitinh,
+    } = req.body;
 
     // Kiểm tra xem có dữ liệu mật khẩu được gửi không
     let updateData = {
@@ -269,6 +282,9 @@ exports.updateUser = async (req, res) => {
       ID_Chucvu,
       ID_KhoiCV: ID_Chucvu == 1 ? null : ID_KhoiCV,
       UserName,
+      Hoten,
+      Sodienthoai,
+      Gioitinh,
       Email,
       isDelete: 0,
     };
@@ -404,10 +420,15 @@ exports.getDetail = async (req, res) => {
           "ID_User",
           "UserName",
           "Email",
-
+          "Hoten",
+          "Sodienthoai",
+          "Ngaysinh",
+          "Gioitinh",
           "Password",
           "ID_Duan",
           "ID_KhoiCV",
+          "ID_Chucvu",
+          "isDelete",
           "ID_Chucvu",
         ],
         order: [

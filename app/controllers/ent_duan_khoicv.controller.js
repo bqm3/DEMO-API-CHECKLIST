@@ -54,6 +54,7 @@ exports.get = async (req, res) => {
         "Chuky",
         "ID_Duan",
         "Ngaybatdau",
+        "isDelete",
       ],
       include: [
         {
@@ -71,6 +72,9 @@ exports.get = async (req, res) => {
           attributes: ["KhoiCV"],
         },
       ],
+      where: {
+        isDelete: 0
+      }
     })
       .then((data) => {
         res.status(200).json({
@@ -184,17 +188,17 @@ exports.delete = async (req, res) => {
   try {
     const userData = req.user.data;
     if (req.params.id && userData) {
-      Ent_khuvuc.update(
+      Ent_duan_khoicv.update(
         { isDelete: 1 },
         {
           where: {
-            ID_Khuvuc: req.params.id,
+            ID_Duan_KhoiCV: req.params.id,
           },
         }
       )
         .then((data) => {
           res.status(200).json({
-            message: "Xóa khu vực thành công!",
+            message: "Xóa thành công!",
           });
         })
         .catch((err) => {

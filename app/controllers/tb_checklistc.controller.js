@@ -94,6 +94,8 @@ exports.createFirstChecklist = async (req, res, next) => {
       ngayCheck = Math.abs(remainder);
     }
 
+    console.log('ngayCheck',ngayCheck)
+
     if (!calvData) {
       return res.status(400).json({
         message: "Ca làm việc không tồn tại!",

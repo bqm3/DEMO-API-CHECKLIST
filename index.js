@@ -47,8 +47,9 @@ var corsOptions = {
     "https://checklist.pmcweb.vn",
     "https://minhepzai.cckvn.vn",
     "http://minhepzai.cckvn.vn",
+    "http://demo.pmcweb.vn",
+    "https://demo.pmcweb.vn",
     "https://qlts.pmcweb.vn",
-    "https://40ce-14-191-164-110.ngrok-free.app",
   ],
 
   credentials: true, //access-control-allow-credentials:true

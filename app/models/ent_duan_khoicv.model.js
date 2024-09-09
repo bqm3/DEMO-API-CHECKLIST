@@ -26,6 +26,10 @@ const Ent_duan_khoicv = sequelize.define(
       type: DataTypes.DATE,
       allowNull: false,
     },
+    isDelete: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
   },
   {
     freezeTableName: true,
