@@ -136,6 +136,7 @@ exports.get = async (req, res) => {
       },
       order: [
         ["Tinhtrangxuly", "ASC"],
+        ["Ngayxuly", "DESC"],
         ["Ngaysuco", "DESC"],
         
       ],
@@ -163,11 +164,12 @@ exports.updateStatus = async (req, res) => {
   try {
     const userData = req.user.data;
     const ID_Suco = req.params.id;
-    const { Tinhtrangxuly } = req.body;
+    const { Tinhtrangxuly, ngayXuLy } = req.body;
     if (ID_Suco && userData) {
       Tb_sucongoai.update(
         {
           Tinhtrangxuly: Tinhtrangxuly,
+          Ngayxuly: ngayXuLy
         },
         {
           where: {
@@ -192,3 +194,36 @@ exports.updateStatus = async (req, res) => {
     });
   }
 };
+
+exports.delete = async(req, res) => {
+  try {
+    const userData = req.user.data;
+    const ID_Suco = req.params.id;
+    if (ID_Suco && userData) {
+      Tb_sucongoai.update(
+        {
+          isDelete: 1,
+        },
+        {
+          where: {
+            ID_Suco: ID_Suco,
+          },
+        }
+      )
+        .then((data) => {
+          res.status(200).json({
+            message: "Xóa thành công!"
+          });
+        })
+        .catch((err) => {
+          res.status(500).json({
+            message: err.message || "Lỗi! Vui lòng thử lại sau.",
+          });
+        });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || "Lỗi! Vui lòng thử lại sau.",
+    });
+  }
+}

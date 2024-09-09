@@ -11,6 +11,7 @@ module.exports = (app) => {
   router.post("/create", [isAuthenticated, upload.any()], tb_sucongoai.create);
   router.get("/", [isAuthenticated], tb_sucongoai.get);
   router.put("/status/:id", [isAuthenticated], tb_sucongoai.updateStatus);
+  router.put("/delete/:id", [isAuthenticated], tb_sucongoai.delete);
 
   app.use("/api/tb_sucongoai", router);
 };

@@ -32,7 +32,8 @@ const Tb_sucongoai = sequelize.define("tb_sucongoai", {
     type: DataTypes.TEXT,
    },
    Tinhtrangxuly: {
-    type: DataTypes.TEXT,
+    type: DataTypes.INTEGER,
+    defaultValue: 0
    },
    Ngayxuly: {
     type: DataTypes.DATE,
