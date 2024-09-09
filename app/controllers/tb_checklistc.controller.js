@@ -147,7 +147,7 @@ exports.createFirstChecklist = async (req, res, next) => {
       ],
       where: [
         {
-          Ngaythu: ngayCheck,
+          Ngaythu: ngayCheck == 0 ? 1 : ngayCheck,
           ID_Calv: ID_Calv,
           ID_Duan: userData.ID_Duan,
           isDelete: 0,
