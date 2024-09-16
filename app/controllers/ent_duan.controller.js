@@ -1,4 +1,4 @@
-const { Ent_duan, Ent_khuvuc, Ent_toanha, Ent_hangmuc, Ent_nhom } = require("../models/setup.model");
+const { Ent_duan, Ent_khuvuc, Ent_toanha, Ent_hangmuc, Ent_nhom, Ent_khuvuc_khoicv, Ent_khoicv } = require("../models/setup.model");
 const { Op } = require("sequelize");
 
 exports.create = (req, res) => {
@@ -244,7 +244,7 @@ exports.getKhuvucByDuan = async (req, res) => {
         },
         {
           model: Ent_nhom,
-          attributes: ["Nhom"],
+          attributes: ["Tennhom"],
         }
       ],
       where: {
@@ -315,6 +315,16 @@ exports.getThongtinduan = async (req, res) => {
                   where: { isDelete: 0 },
                   required: false,
                 },
+                {
+                  model: Ent_khuvuc_khoicv,
+                  attributes: ["ID_KhoiCV", "ID_Khuvuc", "ID_KV_CV"],
+                  include: [
+                    {
+                      model: Ent_khoicv,
+                      attributes: ["KhoiCV", "Ngaybatdau", "Chuky"],
+                    },
+                  ],
+                },
               ],
             },
           ],
@@ -326,7 +336,7 @@ exports.getThongtinduan = async (req, res) => {
       ],
       where: {
         isDelete: 0,
-      },
+      }
     });
 
     const result = data.map((duan) => {
@@ -335,6 +345,7 @@ exports.getThongtinduan = async (req, res) => {
 
       const toanhas = duan.ent_toanha.map((toanha) => {
         let totalHangmucInToanha = 0;
+        const khoisSet = new Set(); // Sử dụng Set để loại bỏ trùng lặp tên khối
         const khuvucs = toanha.ent_khuvuc.map((khuvuc) => {
           const hangmucs = khuvuc.ent_hangmuc.map((hangmuc) => ({
             ID_Hangmuc: hangmuc.ID_Hangmuc,
@@ -342,11 +353,21 @@ exports.getThongtinduan = async (req, res) => {
             MaQrCode: hangmuc.MaQrCode,
             Tieuchuankt: hangmuc.Tieuchuankt,
           }));
+
+          const khoicvs = khuvuc.ent_khuvuc_khoicvs.map((cv) => {
+            khoisSet.add(cv.ent_khoicv.KhoiCV); // Thêm tên khối vào Set
+            return {
+              ID_KhoiCV: cv.ID_KhoiCV,
+              ID_Khuvuc: cv.ID_Khuvuc,
+              ID_KV_CV: cv.ID_KV_CV
+            };
+          });
+
           const hangMucLength = hangmucs.length;
           totalHangmucInToanha += hangMucLength;
           return {
             ID_Khuvuc: khuvuc.ID_Khuvuc,
-            ID_KhoiCV: khuvuc.ID_KhoiCV,
+            ID_KhoiCVs: khoicvs,
             Makhuvuc: khuvuc.Makhuvuc,
             MaQrCode: khuvuc.MaQrCode,
             Tenkhuvuc: khuvuc.Tenkhuvuc,
@@ -354,9 +375,12 @@ exports.getThongtinduan = async (req, res) => {
             hangmuc: hangmucs,
           };
         });
+
         const khuvucLength = khuvucs.length;
         totalHangmucInDuan += totalHangmucInToanha;
         totalKhuvucInDuan += khuvucLength;
+
+        const tenKhois = Array.from(khoisSet); // Chuyển Set thành mảng tên khối
         return {
           ID_Toanha: toanha.ID_Toanha,
           Toanha: toanha.Toanha,
@@ -366,6 +390,7 @@ exports.getThongtinduan = async (req, res) => {
           khuvucLength: khuvucLength,
           khuvuc: khuvucs,
           totalHangmucInToanha,
+          tenKhois, // Thêm trường danh sách tên khối
         };
       });
 
@@ -393,4 +418,77 @@ exports.getThongtinduan = async (req, res) => {
   }
 };
 
+exports.getThongtinduantheonhom = async(req, res) => {
+  try {
+    const data = await Ent_duan.findAll({
+      attributes: [
+        "ID_Duan",
+        "Duan",
+        "Diachi",
+        "Vido",
+        "Kinhdo",
+        "ID_Nhom",
+        "Logo",
+        "isDelete",
+      ],
+      include: [
+        // {
+        //   model: Ent_toanha,
+        //   as: "ent_toanha",
+        //   attributes: ["ID_Toanha", "Toanha", "Sotang", "ID_Duan", "Vido", "Kinhdo", "isDelete"],
+        //   where: { isDelete: 0 },
+        //   required: false,
+        //   include: [
+        //     {
+        //       model: Ent_khuvuc,
+        //       as: "ent_khuvuc",
+        //       attributes: ["ID_Khuvuc", "Makhuvuc", "MaQrCode", "Tenkhuvuc", "isDelete"],
+        //       where: { isDelete: 0 },
+        //       required: false,
+        //       include: [
+        //         {
+        //           model: Ent_hangmuc,
+        //           as: "ent_hangmuc",
+        //           attributes: ["ID_Hangmuc", "ID_Khuvuc", "Hangmuc", "MaQrCode", "isDelete", "Tieuchuankt", "FileTieuChuan"],
+        //           where: { isDelete: 0 },
+        //           required: false,
+        //         },
+        //       ],
+        //     },
+        //   ],
+        // },
+        {
+          model: Ent_nhom,
+          attributes: ["Tennhom"]
+        }
+      ],
+      where: {
+        isDelete: 0,
+      },
+    });
+
+    const groupedData = data.reduce((acc, item) => {
+      const groupName = item.ent_nhom.Tennhom;
+      
+      // Nếu chưa có key với tên nhóm, tạo mới
+      if (!acc[groupName]) {
+        acc[groupName] = [];
+      }
+    
+      // Thêm dự án vào nhóm tương ứng
+      acc[groupName].push(item);
+    
+      return acc;
+    }, {});
+    
+    res.status(200).json({
+      message: "Danh sách dự án với nhóm!",
+      data: groupedData,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message || "Lỗi! Vui lòng thử lại sau.",
+    });
+  }
+}
 

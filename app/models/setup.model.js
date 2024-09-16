@@ -46,7 +46,7 @@ Ent_duan.hasMany(Ent_thietlapca, { as: 'ent_duan', foreignKey: 'ID_Duan' });
 Ent_thietlapca.belongsTo(Ent_duan, { foreignKey: "ID_Duan" })
 
 // Du an ===========================================================================
-Ent_nhom.hasMany(Ent_duan, { as: 'ent_duan', foreignKey: 'ID_Nhom' });
+Ent_nhom.hasMany(Ent_duan);
 Ent_duan.belongsTo(Ent_nhom, { foreignKey: 'ID_Nhom' });
 
 
@@ -172,17 +172,29 @@ Tb_checklistc.belongsTo(Ent_calv, {
   foreignKey: "ID_Calv",
 });
 
-
-// Checklist Chi tiet ===========================================================================
-Tb_checklistc.hasMany(Tb_checklistchitiet);
-Tb_checklistchitiet.belongsTo(Tb_checklistc, {
-  foreignKey: "ID_ChecklistC",
+Ent_thietlapca.hasMany(Tb_checklistc);
+Tb_checklistc.belongsTo(Ent_thietlapca, {
+  foreignKey: "ID_ThietLapCa",
 });
 
+
+
+// Checklist Chi tiet ===========================================================================
 Ent_checklist.hasMany(Tb_checklistchitiet);
 Tb_checklistchitiet.belongsTo(Ent_checklist, {
   foreignKey: "ID_Checklist",
 });
+
+Tb_checklistchitiet.belongsTo(Tb_checklistc, {
+  foreignKey: 'ID_ChecklistC', // Khóa ngoại trỏ đến bảng Tb_checklistc
+  as: 'tb_checklistc' // Alias (bạn có thể thay đổi tùy theo mô hình của bạn)
+});
+
+Tb_checklistc.hasMany(Tb_checklistchitiet, {
+  foreignKey: 'ID_ChecklistC', // Khóa ngoại ở bảng Tb_checklistchitiet
+  as: 'tb_checklistchitiets' // Alias được sử dụng trong `include`
+});
+
 
 // Checklist Chi tiet Done ===========================================================================
 Tb_checklistc.hasMany(Tb_checklistchitietdone);

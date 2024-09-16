@@ -11,6 +11,7 @@ const {
 const { Op, Sequelize, fn, col, literal, where } = require("sequelize");
 const sequelize = require("../config/db.config");
 const xlsx = require("xlsx");
+const e = require("express");
 
 exports.create = async (req, res) => {
   try {
@@ -376,43 +377,41 @@ exports.deleteMul = async (req, res) => {
 
 exports.getKhuVucFilter = async (req, res) => {
   try {
-    const userData = req.user.data;
+    const userData = req.user?.data;
 
     if (userData) {
       // Initialize where condition
       const whereCondition = {
         isDelete: 0, // Always include isDelete condition
-        [Op.and]: [],
       };
+
+      // Tạo danh sách điều kiện
+      const andConditions = [];
 
       if (userData.ID_Chucvu !== 1 && userData.UserName !== "PSH") {
         // Add ID_Duan condition if it exists
         if (userData.ID_Duan !== null) {
-          whereCondition["$ent_toanha.ID_Duan$"] = userData.ID_Duan;
+          andConditions.push({ "$ent_toanha.ID_Duan$": userData.ID_Duan });
         }
 
         // Add ID_KhoiCV condition if it exists
         if (userData.ID_KhoiCV !== null && userData.ID_KhoiCV !== undefined) {
-          whereCondition[Op.and].push(
-            Sequelize.literal(
-              `JSON_CONTAINS(ID_KhoiCVs, '${userData.ID_KhoiCV}')`
-            )
-          );
-
-          // whereCondition[Op.and].push({
-          //   ID_KhoiCV: userData.ID_KhoiCV,
-          // });
-
-          //   // Replace Op.contains with Op.like for MySQL (adjust according to your DB)
+          andConditions.push({ "$ent_khuvuc_khoicvs.ID_KhoiCV$": userData.ID_KhoiCV });
         }
 
         // Add ID_Toanha condition if it exists in request body
-        if (req.body.ID_Toanha !== null && req.body.ID_Toanha !== undefined) {
-          whereCondition[Op.and].push({
-            ID_Toanha: req.body.ID_Toanha,
-          });
+        if (req.body?.ID_Toanha !== null && req.body?.ID_Toanha !== undefined) {
+          andConditions.push({ ID_Toanha: req.body.ID_Toanha });
         }
       }
+
+      // Nếu có điều kiện AND thì thêm vào whereCondition
+      if (andConditions.length > 0) {
+        whereCondition[Op.and] = andConditions;
+      }
+
+      console.log('whereCondition', whereCondition);
+
       // Fetch data
       Ent_khuvuc.findAll({
         attributes: [
@@ -447,6 +446,7 @@ exports.getKhuVucFilter = async (req, res) => {
           },
           {
             model: Ent_khuvuc_khoicv,
+            as: "ent_khuvuc_khoicvs",
             attributes: ["ID_KhoiCV", "ID_Khuvuc", "ID_KV_CV"],
             include: [
               {
@@ -457,6 +457,7 @@ exports.getKhuVucFilter = async (req, res) => {
           },
         ],
         where: whereCondition,
+        raw: false, // Không sử dụng raw để ánh xạ quan hệ
         // order: [["ID_Toanha", "ASC"]],
       })
         .then((data) => {

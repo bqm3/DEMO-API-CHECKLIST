@@ -103,13 +103,14 @@ exports.createCheckListChiTiet = async (req, res, next) => {
         ID_ChecklistC,
         ID_Checklist,
         Vido,
-        Kinhdo,Docao,
+        Kinhdo,
+        Docao,
         Ketqua,
         Gioht,
         Ghichu,
         Checklist,
         Anh,
-        Ngay: formattedDate
+        Ngay: formattedDate,
       };
     });
 
@@ -205,8 +206,17 @@ exports.createCheckListChiTiet = async (req, res, next) => {
         const checklistNames = await Promise.all(
           hasImageAndNote.map(async (record) => {
             const checklist = await Ent_checklist.findOne({
-              attributes: ["Checklist", "ID_Checklist", "isDelete", "isImportant"],
-              where: { ID_Checklist: record.ID_Checklist, isDelete: 0, isImportant: 1 },
+              attributes: [
+                "Checklist",
+                "ID_Checklist",
+                "isDelete",
+                "isImportant",
+              ],
+              where: {
+                ID_Checklist: record.ID_Checklist,
+                isDelete: 0,
+                isImportant: 1,
+              },
             });
             return checklist ? checklist.Checklist : null;
           })
@@ -273,6 +283,7 @@ exports.getCheckListChiTiet = async (req, res, next) => {
         include: [
           {
             model: Tb_checklistc,
+            as: "tb_checklistc",
             attributes: [
               "ID_ChecklistC",
               "Ngay",
@@ -345,7 +356,7 @@ exports.getCheckListChiTiet = async (req, res, next) => {
               },
               {
                 model: Ent_user,
-                attributes: ["UserName"],
+                attributes: ["UserName", "Hoten", "Sodienthoai", "Email"],
               },
             ],
           },
@@ -439,7 +450,7 @@ exports.getDetail = async (req, res) => {
               },
               {
                 model: Ent_user,
-                attributes: ["UserName"],
+                attributes: ["UserName", "Hoten", "Sodienthoai", "Email"],
               },
             ],
           },
@@ -488,22 +499,22 @@ exports.searchChecklist = async (req, res) => {
       const pageSize = parseInt(req.query.limit) || 100; // Số lượng phần tử trên mỗi trang
       const offset = page * pageSize;
 
-      if (userData?.ID_KhoiCV !== null) {
+      if (userData?.ID_KhoiCV !== null && userData?.ID_KhoiCV !== undefined) {
         orConditions.push({ "$tb_checklistc.ID_KhoiCV$": userData?.ID_KhoiCV });
       }
 
       // orConditions.push({ "$tb_checklistc.ID_KhoiCV$": userData?.ID_KhoiCV });
       orConditions.push({ "$tb_checklistc.ID_Duan$": userData?.ID_Duan });
 
-      if (ID_Khuvuc !== null) {
+      if (ID_Khuvuc !== null && ID_Khuvuc !== undefined) {
         orConditions.push({ "$ent_checklist.ID_Khuvuc$": ID_Khuvuc });
       }
 
-      if (ID_Tang !== null) {
+      if (ID_Tang !== null && ID_Tang !== undefined) {
         orConditions.push({ "$ent_checklist.ID_Tang$": ID_Tang });
       }
 
-      if (ID_Toanha !== null) {
+      if (ID_Toanha !== null && ID_Toanha !== undefined) {
         orConditions.push({
           "$ent_checklist.ent_khuvuc.ID_Toanha$": ID_Toanha,
         });
@@ -523,13 +534,8 @@ exports.searchChecklist = async (req, res) => {
         include: [
           {
             model: Tb_checklistc,
-            attributes: [
-              "Ngay",
-              "Giobd",
-              "Giokt",
-              "ID_KhoiCV",
-              "ID_Calv",
-            ],
+            as: "tb_checklistc",
+            attributes: ["Ngay", "Giobd", "Giokt", "ID_KhoiCV", "ID_Calv"],
             where: {
               Ngay: { [Op.between]: [fromDate, toDate] }, // Filter by Ngay attribute between fromDate and toDate
             },
@@ -546,6 +552,10 @@ exports.searchChecklist = async (req, res) => {
               {
                 model: Ent_calv,
                 attributes: ["Tenca", "Giobatdau", "Gioketthuc"],
+              },
+              {
+                model: Ent_user,
+                attributes: ["UserName", "Hoten", "Sodienthoai", "Email"],
               },
             ],
           },
@@ -584,11 +594,7 @@ exports.searchChecklist = async (req, res) => {
               },
               {
                 model: Ent_tang,
-                attributes: ["Tentang", "Sotang"],
-              },
-              {
-                model: Ent_user,
-                attributes: ["UserName"],
+                attributes: ["Tentang"],
               },
             ],
           },
@@ -614,13 +620,8 @@ exports.searchChecklist = async (req, res) => {
         include: [
           {
             model: Tb_checklistc,
-            attributes: [
-              "Ngay",
-              "Giobd",
-              "Giokt",
-              "ID_KhoiCV",
-              "ID_Calv",
-            ],
+            as: "tb_checklistc",
+            attributes: ["Ngay", "Giobd", "Giokt", "ID_KhoiCV", "ID_Calv"],
             where: {
               Ngay: { [Op.between]: [fromDate, toDate] }, // Filter by Ngay attribute between fromDate and toDate
             },
@@ -630,7 +631,7 @@ exports.searchChecklist = async (req, res) => {
                 model: Ent_khoicv,
                 attributes: ["KhoiCV", "Ngaybatdau", "Chuky"],
               },
-             
+
               {
                 model: Ent_duan,
                 attributes: ["Duan"],
@@ -638,6 +639,10 @@ exports.searchChecklist = async (req, res) => {
               {
                 model: Ent_calv,
                 attributes: ["Tenca", "Giobatdau", "Gioketthuc"],
+              },
+              {
+                model: Ent_user,
+                attributes: ["UserName", "Hoten", "Sodienthoai", "Email"],
               },
             ],
           },
@@ -678,11 +683,7 @@ exports.searchChecklist = async (req, res) => {
               },
               {
                 model: Ent_tang,
-                attributes: ["Tentang", "Sotang"],
-              },
-              {
-                model: Ent_user,
-                attributes: ["UserName"],
+                attributes: ["Tentang"],
               },
             ],
           },
@@ -692,7 +693,7 @@ exports.searchChecklist = async (req, res) => {
           [Op.and]: [orConditions],
         },
         order: [
-          [ "Ngay", "DESC"],
+          ["Ngay", "DESC"],
           ["Gioht", "DESC"],
         ],
         limit: pageSize,
@@ -987,7 +988,6 @@ exports.getWriteExcel = async (req, res, next) => {
   }
 };
 
-
 cron.schedule("0 * * * *", async function () {
   console.log("---------------------");
   console.log("Running Cron Job");
@@ -1027,7 +1027,7 @@ cron.schedule("0 * * * *", async function () {
     const seen = new Map();
     const duplicates = [];
 
-    results.forEach(record => {
+    results.forEach((record) => {
       const key = `${record.ID_Checklist}_${record.ID_ChecklistC}_${record.Gioht}`;
       if (seen.has(key)) {
         duplicates.push(record);
@@ -1037,8 +1037,10 @@ cron.schedule("0 * * * *", async function () {
     });
 
     // Xóa các bản ghi trùng lặp và cập nhật số lượng đã xóa
-    const deletePromises = duplicates.map(record => 
-      Tb_checklistchitiet.destroy({ where: { ID_Checklistchitiet: record.ID_Checklistchitiet } })
+    const deletePromises = duplicates.map((record) =>
+      Tb_checklistchitiet.destroy({
+        where: { ID_Checklistchitiet: record.ID_Checklistchitiet },
+      })
     );
     await Promise.all(deletePromises);
 
@@ -1052,11 +1054,12 @@ cron.schedule("0 * * * *", async function () {
     }, {});
 
     // Cập nhật lại bảng tb_checklistc
-    const updatePromises = Object.entries(deletedCountByChecklistC).map(([ID_ChecklistC, count]) =>
-      Tb_checklistc.update(
-        { TongC: Sequelize.literal(`TongC - ${count}`) },
-        { where: { ID_ChecklistC } }
-      )
+    const updatePromises = Object.entries(deletedCountByChecklistC).map(
+      ([ID_ChecklistC, count]) =>
+        Tb_checklistc.update(
+          { TongC: Sequelize.literal(`TongC - ${count}`) },
+          { where: { ID_ChecklistC } }
+        )
     );
     await Promise.all(updatePromises);
 

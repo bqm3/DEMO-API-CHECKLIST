@@ -46,9 +46,12 @@ exports.get = async (req, res) => {
     const userData = req.user.data;
     if (userData) {
       await Ent_chucvu.findAll({
+        attributes: [
+          "ID_Chucvu","Chucvu", "isDelete"
+        ],
         where: {
           isDelete: 0,
-          Chucvu: {[Op.ne]: 'PSH'}
+          ID_Chucvu: {[Op.notIn]: [1,5,6,7]}
         },
       })
         .then((data) => {

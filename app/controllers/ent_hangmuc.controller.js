@@ -515,6 +515,7 @@ exports.getHangmucTotal = async (req, res) => {
           attributes: [
             "ID_Toanha",
             "ID_Khuvuc",
+            "ID_KhoiCVs",
             "Sothutu",
             "MaQrCode",
             "Tenkhuvuc",
@@ -559,17 +560,37 @@ exports.getHangmucTotal = async (req, res) => {
       });
     }
 
-    // Count checklists by ID_KhoiCV
+    const khoiCVData = [
+      { ID_KhoiCV: 1, KhoiCV: "Khối làm sạch" },
+      { ID_KhoiCV: 2, KhoiCV: "Khối kỹ thuật" },
+      { ID_KhoiCV: 3, KhoiCV: "Khối bảo vệ" },
+      { ID_KhoiCV: 4, KhoiCV: "Khối dịch vụ" },
+    ];
+
+    const khoiCVMap = {};
+    khoiCVData.forEach((item) => {
+      khoiCVMap[item.ID_KhoiCV] = item.KhoiCV;
+    });
+
     const hangmucCounts = {};
-    // hangmucData.forEach((item) => {
-    //   const khoiCV = item?.ent_khoicv?.KhoiCV;
-    //   if (khoiCV) {
-    //     if (!hangmucCounts[khoiCV]) {
-    //       hangmucCounts[khoiCV] = 0;
-    //     }
-    //     hangmucCounts[khoiCV]++;
-    //   }
-    // });
+    hangmucData.forEach((item) => {
+      let ID_KhoiCVs = item.ent_khuvuc.ID_KhoiCVs;
+      if (typeof ID_KhoiCVs === "string") {
+        try {
+          ID_KhoiCVs = JSON.parse(ID_KhoiCVs);
+        } catch (error) {
+          return;
+        }
+      }
+      ID_KhoiCVs.forEach((id) => {
+        const khoiCV = khoiCVMap[id];
+        if (!hangmucCounts[khoiCV]) {
+          hangmucCounts[khoiCV] = 0;
+        }
+        hangmucCounts[khoiCV]++;
+      });
+    });
+    
     // Convert counts to desired format
     const result = Object.keys(hangmucCounts).map((khoiCV) => ({
       label: khoiCV,

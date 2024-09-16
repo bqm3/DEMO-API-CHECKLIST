@@ -20,11 +20,9 @@ const Tb_checklistchitiet = sequelize.define(
     },
     Ketqua: {
       type: DataTypes.CHAR,
-      allowNull: true
     },
     Anh: {
-      type: DataTypes.TEXT,
-      allowNull: true
+      type: DataTypes.CHAR,
     },
     Ngay: {
       type: DataTypes.DATE,
@@ -34,7 +32,6 @@ const Tb_checklistchitiet = sequelize.define(
     },
     Ghichu: {
       type: DataTypes.TEXT,
-      allowNull: true
     },
     Vido: {
       type: DataTypes.CHAR,

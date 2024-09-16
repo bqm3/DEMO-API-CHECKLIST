@@ -7,11 +7,12 @@ module.exports = (app) => {
 
   var router = require("express").Router();
 
-  // Create a new tb_sucongoai
   router.post("/create", [isAuthenticated, upload.any()], tb_sucongoai.create);
   router.get("/", [isAuthenticated], tb_sucongoai.get);
   router.put("/status/:id", [isAuthenticated], tb_sucongoai.updateStatus);
   router.put("/delete/:id", [isAuthenticated], tb_sucongoai.delete);
-
+  router.get("/dashboard-by-duan", [isAuthenticated], tb_sucongoai.dashboardByDuAn);
+  router.get("/dashboard", tb_sucongoai.dashboardAll);
+  
   app.use("/api/tb_sucongoai", router);
 };

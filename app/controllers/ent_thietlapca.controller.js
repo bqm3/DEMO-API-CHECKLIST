@@ -32,6 +32,7 @@ exports.create = async (req, res) => {
         "ID_Calv",
         "Ngaythu",
         "ID_Hangmucs",
+        "Sochecklist",
         "ID_ThietLapCa",
         "isDelete",
       ],
@@ -40,6 +41,14 @@ exports.create = async (req, res) => {
         Ngaythu: Ngaythu
       }
     })
+
+    const checklistCount = await Ent_checklist.count({
+      where: {
+        ID_Hangmuc: {
+          [Op.in]: ID_Hangmucs, // Assuming ID_Hangmucs is an array
+        },
+      },
+    });
 
     if(findKhuvuc){
       return res.status(400).json({
@@ -52,6 +61,7 @@ exports.create = async (req, res) => {
         Ngaythu: Ngaythu,
         Sochecklist: Sochecklist,
         ID_Hangmucs: ID_Hangmucs,
+        Sochecklist: checklistCount,
         ID_Calv: ID_Calv,
         ID_Duan: userData.ID_Duan,
       };
@@ -84,6 +94,7 @@ exports.get = async (req, res) => {
           "ID_Duan",
           "ID_Calv",
           "Ngaythu",
+          "Sochecklist",
           "ID_Hangmucs",
           "ID_ThietLapCa",
           "isDelete",
@@ -146,6 +157,7 @@ exports.getDetail = async (req, res) => {
           "ID_Calv",
           "Ngaythu",
           "ID_Hangmucs",
+          "Sochecklist",
           "ID_ThietLapCa",
           "isDelete",
         ],
@@ -185,6 +197,7 @@ exports.getDetail = async (req, res) => {
           "ID_KhoiCVs",
           "Makhuvuc",
           "MaQrCode",
+          
           "Tenkhuvuc",
           "ID_User",
           "isDelete",
@@ -244,20 +257,27 @@ exports.update = async (req, res) => {
   try {
     const ID_ThietLapCa = req.params.id;
     const userData = req.user.data;
-    const { ID_KhoiCV, ID_Calv, Ngaythu, ID_Hangmucs, Sochecklist } = req.body;
+    const { ID_KhoiCV, ID_Calv, Ngaythu, ID_Hangmucs } = req.body;
     if (!ID_Calv || !ID_Hangmucs) {
       return res.status(400).json({
         message: "Phải nhập đầy đủ dữ liệu!",
       });
     }
+    const checklistCount = await Ent_checklist.count({
+      where: {
+        ID_Hangmuc: {
+          [Op.in]: ID_Hangmucs, // Assuming ID_Hangmucs is an array
+        },
+      },
+    });
 
     Ent_thietlapca.update(
       {
         ID_Duan: userData.ID_Duan,
         ID_Calv: ID_Calv,
         Ngaythu: Ngaythu,
+        Sochecklist: checklistCount,
         ID_Hangmucs: ID_Hangmucs,
-        Sochecklist: Sochecklist,
       },
       {
         where: {
