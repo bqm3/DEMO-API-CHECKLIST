@@ -16,6 +16,9 @@ const Ent_checklist = sequelize.define(
     ID_Hangmuc: {
       type: DataTypes.INTEGER,
     },
+    ID_Tang: {
+      type: DataTypes.INTEGER,
+    },
     Sothutu: {
       type: DataTypes.INTEGER,
       allowNull: false,

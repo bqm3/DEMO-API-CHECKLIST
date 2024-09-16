@@ -25,14 +25,21 @@ module.exports = (app) => {
     [isAuthenticated],
     tb_checklistc.checklistCalvDinhKy
   );
-
-  router.get("/top3", tb_checklistc.top3kythuatMaxMin);
+  
+  // Role: VIP
+  //========================================== 
+  router.get("/top-10-max", tb_checklistc.top10max )
+  router.get("/top3", tb_checklistc.topCompletionRate);
   router.get("/list-checklist-error", tb_checklistc.getChecklistsErrorFromYesterday);
   router.get("/list-project-none", tb_checklistc.getProjectsChecklistStatus);
-  router.get("/list-checklist-error-project", [isAuthenticated], tb_checklistc.getChecklistsErrorFromWeek)
+  router.get("/ti-le-hoan-thanh", tb_checklistc.tiLeHoanThanh);
+  router.get("/ti-le-su-co", tb_checklistc.tiLeSuco);
+  //==========================================
+
+  router.get("/list-checklist-error-project", [isAuthenticated], tb_checklistc.getChecklistsErrorFromWeekbyDuan)
   router.get("/list-checklist", [isAuthenticated], tb_checklistc.getChecklistsError)
-  
-  router.get("/year", [isAuthenticated], tb_checklistc.checklistYear);
+  router.get("/year", [isAuthenticated], tb_checklistc.checklistYearByKhoiCV);
+  router.get("/year-su-co", [isAuthenticated], tb_checklistc.checklistYearByKhoiCVSuCo);
   router.get("/percent", [isAuthenticated], tb_checklistc.checklistPercent);
   router.get("/", [isAuthenticated], tb_checklistc.getCheckListc);
   router.get("/:id", [isAuthenticated], tb_checklistc.getDetail);
