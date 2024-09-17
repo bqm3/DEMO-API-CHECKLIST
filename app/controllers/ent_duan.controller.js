@@ -54,6 +54,29 @@ exports.get = async (req, res) => {
     const userData = req.user.data;
     if (userData && userData.ent_chucvu.Chucvu === "PSH") {
       await Ent_duan.findAll({
+        attributes: [
+          "ID_Duan",
+          "Duan",
+          "Diachi",
+          "ID_Nhom",
+          "Vido",
+          "Kinhdo",
+          "Logo",
+          "isDelete",
+        ],
+        include: [
+          {
+            model: Ent_toanha,
+            as: "ent_toanha", // Ensure this matches the alias used in your model definition
+            attributes: ["Toanha", "Sotang", "ID_Duan", "Vido", "Kinhdo"],
+            where: { isDelete: 0 },
+            required: false, // Use this to include projects without buildings
+          },
+          {
+            model: Ent_nhom,
+            attributes: ["Tennhom, ID_Nhom"],
+          }
+        ],
         where: {
           isDelete: 0,
         },
@@ -71,6 +94,29 @@ exports.get = async (req, res) => {
         });
     } else if (userData && userData.ent_chucvu.Chucvu !== "PSH") {
       await Ent_duan.findAll({
+        attributes: [
+          "ID_Duan",
+          "Duan",
+          "Diachi",
+          "ID_Nhom",
+          "Vido",
+          "Kinhdo",
+          "Logo",
+          "isDelete",
+        ],
+        include: [
+          {
+            model: Ent_toanha,
+            as: "ent_toanha", // Ensure this matches the alias used in your model definition
+            attributes: ["Toanha", "Sotang", "ID_Duan", "Vido", "Kinhdo"],
+            where: { isDelete: 0 },
+            required: false, // Use this to include projects without buildings
+          },
+          {
+            model: Ent_nhom,
+            attributes: ["Tennhom, ID_Nhom"],
+          }
+        ],
         where: {
           [Op.and]: {
             isDelete: 0,
@@ -244,7 +290,7 @@ exports.getKhuvucByDuan = async (req, res) => {
         },
         {
           model: Ent_nhom,
-          attributes: ["Tennhom"],
+          attributes: ["Tennhom, ID_Nhom"],
         }
       ],
       where: {
@@ -331,7 +377,7 @@ exports.getThongtinduan = async (req, res) => {
         },
         {
           model: Ent_nhom,
-          attributes: ["Tennhom"]
+          attributes: ["Tennhom, ID_Nhom"]
         }
       ],
       where: {
@@ -459,7 +505,7 @@ exports.getThongtinduantheonhom = async(req, res) => {
         // },
         {
           model: Ent_nhom,
-          attributes: ["Tennhom"]
+          attributes: ["Tennhom, ID_Nhom"]
         }
       ],
       where: {
