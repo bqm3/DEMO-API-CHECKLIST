@@ -31,6 +31,12 @@ const Tb_sucongoai = sequelize.define("tb_sucongoai", {
    Duongdancacanh: {
     type: DataTypes.TEXT,
    },
+   Anhkiemtra: {
+    type: DataTypes.TEXT,
+   },
+   Ghichu: {
+    type: DataTypes.TEXT,
+   },
    Tinhtrangxuly: {
     type: DataTypes.INTEGER,
     defaultValue: 0

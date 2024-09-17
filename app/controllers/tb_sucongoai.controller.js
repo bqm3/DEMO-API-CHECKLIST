@@ -48,8 +48,6 @@ exports.create = async (req, res) => {
       ID_User: ID_User,
     };
 
-    console.log("data", data);
-
     Tb_sucongoai.create(data)
       .then(() => {
         res.status(200).json({
@@ -164,12 +162,26 @@ exports.updateStatus = async (req, res) => {
   try {
     const userData = req.user.data;
     const ID_Suco = req.params.id;
-    const { Tinhtrangxuly, ngayXuLy } = req.body;
+    const { files } = req;
+    const uploadedFileIds = [];
+    if (files) {
+      for (const image of files) {
+        const fileId = await uploadFile(image);
+        uploadedFileIds.push({ id: fileId, name: image.originalname });
+      }
+    }
+    const ids = uploadedFileIds.map((file) => file.id.id);
+
+    // Nối các id lại thành chuỗi, cách nhau bằng dấu phẩy
+    const idsString = ids.join(",");
+    const { Tinhtrangxuly, ngayXuLy, Ghichu } = req.body;
     if (ID_Suco && userData) {
       Tb_sucongoai.update(
         {
           Tinhtrangxuly: Tinhtrangxuly,
-          Ngayxuly: ngayXuLy
+          Ngayxuly: ngayXuLy,
+          Anhkiemtra: idsString,
+          Ghichu: Ghichu || null
         },
         {
           where: {

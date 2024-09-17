@@ -25,6 +25,12 @@ module.exports = (app) => {
     [isAuthenticated],
     tb_checklistc.checklistCalvDinhKy
   );
+
+  // Xuất báo cáo
+  //==================================
+  router.post("/cac-loai-bao-cao/:id", [isAuthenticated], tb_checklistc.createExcelTongHopCa);
+  router.post("/thong-ke-tra-cucu", [isAuthenticated], tb_checklistc.createExcelThongKeTraCuu);
+  router.post("/baocao", [isAuthenticated], tb_checklistc.createExcelFile);
   
   // Role: VIP
   //========================================== 
@@ -47,7 +53,7 @@ module.exports = (app) => {
   router.put("/open/:id", [isAuthenticated], tb_checklistc.open);
   router.get("/update-tongC/:id1/:id2", tb_checklistc.updateTongC);
   router.put("/delete/:id", [isAuthenticated], tb_checklistc.delete);
-  router.post("/baocao", [isAuthenticated], tb_checklistc.createExcelFile);
+
  
   router.post(
     "/update_images/:id",
