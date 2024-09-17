@@ -12,7 +12,6 @@ const Ent_nhom = sequelize.define(
     },
     Tennhom: {
       type: DataTypes.CHAR,
-      allowNull: false,
     },
     isDelete: {
       type: DataTypes.INTEGER,

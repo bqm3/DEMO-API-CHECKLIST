@@ -85,6 +85,7 @@ require("./app/routes/tb_checklistchitiet.route")(app);
 require("./app/routes/tb_checklistchitietdone.route")(app);
 require("./app/routes/ent_duan_khoicv.route")(app);
 require("./app/routes/tb_sucongoai.route")(app);
+require("./app/routes/mail.route")(app);
 
 const PORT = process.env.PORT || 6969;
 app.listen(PORT, () => {

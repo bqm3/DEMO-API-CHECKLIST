@@ -106,7 +106,6 @@ exports.register = async (req, res, next) => {
       UserName,
       Password,
       ID_Chucvu,
-      ID_Duan,
       Hoten,
       Sodienthoai,
       Gioitinh,
@@ -119,12 +118,13 @@ exports.register = async (req, res, next) => {
         message: "Phải nhập đầy đủ dữ liệu.",
       });
     }
+    const userData = req.user.data;
     const user = await Ent_user.findOne({
       where: {
         [Op.and]: [
           { UserName: UserName },
           { Email: Email },
-          { ID_Duan: ID_Duan },
+          { ID_Duan: userData.ID_Duan },
         ],
       },
       attributes: [
@@ -160,7 +160,7 @@ exports.register = async (req, res, next) => {
       Email: Email,
       Password: await hashSync(Password, salt),
       ID_Chucvu: ID_Chucvu,
-      ID_Duan: ID_Duan || null,
+      ID_Duan: userData.ID_Duan || null,
       Hoten: Hoten || null,
       Sodienthoai: Sodienthoai || null,
       Gioitinh: Gioitinh || null,

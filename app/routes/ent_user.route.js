@@ -10,7 +10,7 @@ module.exports = (app) => {
     router.get("/:id",[isAuthenticated, isAdmin], ent_user.getDetail);
     router.post("/check-auth",[isAuthenticated], ent_user.checkAuth);
     router.post("/device-token",[isAuthenticated], ent_user.deviceToken);
-    router.post("/register", ent_user.register);
+    router.post("/register", [isAuthenticated],ent_user.register);
     router.post("/change-password",[isAuthenticated], ent_user.changePassword);
     router.put("/delete/:id",[isAuthenticated, isAdmin], ent_user.deleteUser);
     router.put("/update/:id",[isAuthenticated, isAdmin], ent_user.updateUser);
