@@ -46,7 +46,7 @@ Ent_duan.hasMany(Ent_thietlapca, { as: 'ent_duan', foreignKey: 'ID_Duan' });
 Ent_thietlapca.belongsTo(Ent_duan, { foreignKey: "ID_Duan" })
 
 // Du an ===========================================================================
-Ent_nhom.hasMany(Ent_duan);
+Ent_nhom.hasMany(Ent_duan, { as: 'ent_nhom', foreignKey: 'ID_Nhom' });
 Ent_duan.belongsTo(Ent_nhom, { foreignKey: 'ID_Nhom' });
 
 

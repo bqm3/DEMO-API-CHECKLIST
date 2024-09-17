@@ -74,7 +74,8 @@ exports.get = async (req, res) => {
           },
           {
             model: Ent_nhom,
-            attributes: ["Tennhom, ID_Nhom"],
+            as: "ent_nhom",
+            attributes: ["Tennhom","ID_Nhom"],
           }
         ],
         where: {
@@ -114,7 +115,8 @@ exports.get = async (req, res) => {
           },
           {
             model: Ent_nhom,
-            attributes: ["Tennhom, ID_Nhom"],
+            as:"ent_nhom",
+            attributes: ["Tennhom","ID_Nhom"],
           }
         ],
         where: {
@@ -290,7 +292,7 @@ exports.getKhuvucByDuan = async (req, res) => {
         },
         {
           model: Ent_nhom,
-          attributes: ["Tennhom, ID_Nhom"],
+          attributes: ["Tennhom","ID_Nhom"],
         }
       ],
       where: {
@@ -377,7 +379,7 @@ exports.getThongtinduan = async (req, res) => {
         },
         {
           model: Ent_nhom,
-          attributes: ["Tennhom, ID_Nhom"]
+          attributes: ["Tennhom","ID_Nhom"]
         }
       ],
       where: {
@@ -505,7 +507,7 @@ exports.getThongtinduantheonhom = async(req, res) => {
         // },
         {
           model: Ent_nhom,
-          attributes: ["Tennhom, ID_Nhom"]
+          attributes: ["Tennhom","ID_Nhom"]
         }
       ],
       where: {

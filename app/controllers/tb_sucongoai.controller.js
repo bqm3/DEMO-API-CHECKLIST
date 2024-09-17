@@ -65,7 +65,6 @@ exports.create = async (req, res) => {
     });
   }
 };
-
 exports.get = async (req, res) => {
   try {
     const userData = req.user.data;
@@ -127,7 +126,7 @@ exports.get = async (req, res) => {
           ],
         },
       ],
-      limit: 50,
+      limit: 30,
       where: {
         isDelete: 0,
         // Tinhtrangxuly: {
