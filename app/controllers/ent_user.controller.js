@@ -280,7 +280,7 @@ exports.updateUser = async (req, res) => {
     let updateData = {
       ID_Duan,
       ID_Chucvu,
-      ID_KhoiCV: ID_Chucvu == 1 ? null : ID_KhoiCV,
+      ID_KhoiCV: (ID_KhoiCV === null || ID_KhoiCV === "") ? null : ID_KhoiCV,
       UserName,
       Hoten,
       Sodienthoai,
