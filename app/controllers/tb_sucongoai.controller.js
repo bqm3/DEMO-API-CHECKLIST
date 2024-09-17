@@ -85,6 +85,8 @@ exports.get = async (req, res) => {
         "Duongdancacanh",
         "ID_User",
         "Tinhtrangxuly",
+        "Anhkiemtra",
+        "Ghichu",
         "Ngayxuly",
         "isDelete",
       ],
