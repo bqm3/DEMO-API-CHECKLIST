@@ -11,9 +11,12 @@ module.exports = (app) => {
   
   router.get("/", [isAuthenticated], tb_sucongoai.get);
   router.put("/status/:id", [isAuthenticated, upload.any()], tb_sucongoai.updateStatus);
+  router.get('/getDetail/:id', [isAuthenticated], tb_sucongoai.getDetail);
   router.put("/delete/:id", [isAuthenticated], tb_sucongoai.delete);
   router.get("/dashboard-by-duan", [isAuthenticated], tb_sucongoai.dashboardByDuAn);
   router.get("/dashboard", tb_sucongoai.dashboardAll);
   
   app.use("/api/tb_sucongoai", router);
 };
+
+

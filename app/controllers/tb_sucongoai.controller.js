@@ -137,7 +137,6 @@ exports.get = async (req, res) => {
         ["Tinhtrangxuly", "ASC"],
         ["Ngayxuly", "DESC"],
         ["Ngaysuco", "DESC"],
-        
       ],
     });
 
@@ -182,7 +181,7 @@ exports.updateStatus = async (req, res) => {
           Tinhtrangxuly: Tinhtrangxuly,
           Ngayxuly: ngayXuLy,
           Anhkiemtra: idsString,
-          Ghichu: Ghichu || null
+          Ghichu: Ghichu || null,
         },
         {
           where: {
@@ -192,7 +191,7 @@ exports.updateStatus = async (req, res) => {
       )
         .then((data) => {
           res.status(200).json({
-            message: "Cập nhật thành công!"
+            message: "Cập nhật thành công!",
           });
         })
         .catch((err) => {
@@ -208,7 +207,92 @@ exports.updateStatus = async (req, res) => {
   }
 };
 
-exports.delete = async(req, res) => {
+exports.getDetail = async (req, res) => {
+  try {
+    const userData = req.user.data;
+    const ID_Suco = req.params.id;
+
+    if (!userData) {
+      return res
+        .status(401)
+        .json({ message: "Không tìm thấy thông tin người dùng." });
+    }
+
+    const data = await Tb_sucongoai.findOne({
+      attributes: [
+        "ID_Suco",
+        "ID_Hangmuc",
+        "Ngaysuco",
+        "Giosuco",
+        "Noidungsuco",
+        "Duongdancacanh",
+        "ID_User",
+        "Tinhtrangxuly",
+        "Anhkiemtra",
+        "Ghichu",
+        "Ngayxuly",
+        "isDelete",
+      ],
+      include: [
+        {
+          model: Ent_hangmuc,
+          as: "ent_hangmuc",
+          attributes: [
+            "Hangmuc",
+            "Tieuchuankt",
+            "ID_Khuvuc",
+            "MaQrCode",
+            "FileTieuChuan",
+            "ID_Khuvuc",
+          ],
+        },
+        {
+          model: Ent_user,
+          attributes: ["UserName", "Email", "Hoten", "ID_Duan"],
+          include: [
+            {
+              model: Ent_duan,
+              attributes: [
+                "ID_Duan",
+                "Duan",
+                "Diachi",
+                "Vido",
+                "Kinhdo",
+                "Logo",
+              ],
+              where: { ID_Duan: userData.ID_Duan },
+            },
+            {
+              model: Ent_chucvu,
+              attributes: ["Chucvu"],
+            },
+          ],
+        },
+      ],
+      where: {
+        ID_Suco: ID_Suco, // Sử dụng giá trị cụ thể
+        isDelete: 0,
+      },
+    });
+
+    if (!data) {
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy sự cố với ID này!" });
+    }
+
+    return res.status(200).json({
+      message: "Thông tin sự cố",
+      data: data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || "Lỗi! Vui lòng thử lại sau.",
+    });
+  }
+};
+
+exports.delete = async (req, res) => {
   try {
     const userData = req.user.data;
     const ID_Suco = req.params.id;
@@ -225,7 +309,7 @@ exports.delete = async(req, res) => {
       )
         .then((data) => {
           res.status(200).json({
-            message: "Xóa thành công!"
+            message: "Xóa thành công!",
           });
         })
         .catch((err) => {
@@ -239,13 +323,13 @@ exports.delete = async(req, res) => {
       message: error.message || "Lỗi! Vui lòng thử lại sau.",
     });
   }
-}
+};
 
 exports.dashboardByDuAn = async (req, res) => {
   try {
     const userData = req.user.data;
-    const year = req.query.year || new Date().getFullYear(); 
-    const tangGiam = 'desc'; // Thứ tự sắp xếp
+    const year = req.query.year || new Date().getFullYear();
+    const tangGiam = "desc"; // Thứ tự sắp xếp
 
     // Xây dựng điều kiện where cho truy vấn
     let whereClause = {
@@ -321,8 +405,8 @@ exports.dashboardByDuAn = async (req, res) => {
                   ],
                 },
               ],
-            }
-          ]
+            },
+          ],
         },
       ],
     });
@@ -337,7 +421,7 @@ exports.dashboardByDuAn = async (req, res) => {
     // Xử lý dữ liệu để đếm số lượng sự cố cho từng trạng thái theo tháng
     relatedSucos.forEach((suco) => {
       const sucoDate = new Date(suco.Ngaysuco);
-      const sucoMonth = sucoDate.getMonth(); 
+      const sucoMonth = sucoDate.getMonth();
 
       switch (suco.Tinhtrangxuly) {
         case 0:
@@ -374,13 +458,24 @@ exports.dashboardByDuAn = async (req, res) => {
 
     const result = {
       categories: [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
       ],
       series: [
         {
           type: String(year), // Gán type với giá trị năm
           data: sortedSeries,
-        }
+        },
       ],
     };
 
@@ -398,8 +493,8 @@ exports.dashboardByDuAn = async (req, res) => {
 
 exports.dashboardAll = async (req, res) => {
   try {
-    const year = req.query.year || new Date().getFullYear(); 
-    const tangGiam = 'desc'; // Thứ tự sắp xếp
+    const year = req.query.year || new Date().getFullYear();
+    const tangGiam = "desc"; // Thứ tự sắp xếp
 
     // Xây dựng điều kiện where cho truy vấn
     let whereClause = {
@@ -474,8 +569,8 @@ exports.dashboardAll = async (req, res) => {
                   ],
                 },
               ],
-            }
-          ]
+            },
+          ],
         },
       ],
     });
@@ -503,16 +598,14 @@ exports.dashboardAll = async (req, res) => {
     const allProjects = Object.values(relatedSucos).map(
       (suco) => suco.ent_hangmuc.ent_khuvuc.ent_toanha.ent_duan.Duan
     );
-    
+
     const uniqueProjects = [...new Set(allProjects)];
 
     // Chuyển đổi dữ liệu thành định dạng mong muốn
     const seriesData = Object.entries(projectIncidentCountByYear).map(
       ([year, projectCount]) => ({
         name: year,
-        data: uniqueProjects.map(
-          (project) => projectCount[project] || 0
-        ),
+        data: uniqueProjects.map((project) => projectCount[project] || 0),
       })
     );
 
@@ -530,4 +623,3 @@ exports.dashboardAll = async (req, res) => {
     });
   }
 };
-
