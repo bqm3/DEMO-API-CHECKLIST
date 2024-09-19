@@ -10,6 +10,8 @@ const jsonwebtoken = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const fetch = require("node-fetch");
 const moment = require("moment-timezone");
+const sequelize = require("../config/db.config");
+const xlsx = require("xlsx");
 
 // Login User
 exports.login = async (req, res) => {
@@ -838,13 +840,12 @@ exports.uploadFileUsers = async (req, res) => {
           console.log(`User đã tồn tại, bỏ qua`);
           continue; // Skip the current iteration and move to the next item
         }
-
-        const hashedNewPassword = await hashSync(matKhau, 10);
+        const salt = genSaltSync(10);
         const dataInsert = {
           ID_Duan: userData.ID_Toanha,
           ID_Chucvu: dataChucvu.ID_Chucvu,
           ID_KhoiCV: dataKhoiCV.ID_KhoiCV,
-          Password: hashedNewPassword,
+          Password: await hashSync(matKhau, salt),
           Email: gmail,
           Hoten: hoTen,
           Gioitinh: gioiTinh,
@@ -853,7 +854,7 @@ exports.uploadFileUsers = async (req, res) => {
           isDelete: 0,
         };
 
-        await Ent_user.create(dataInsert, {
+        Ent_user.create(dataInsert, {
           transaction,
         });
       }
