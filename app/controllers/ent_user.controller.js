@@ -114,6 +114,7 @@ exports.register = async (req, res, next) => {
       Ngaysinh,
       ID_KhoiCV,
       Email,
+      ID_Duan
     } = req.body;
     if (!UserName || !Password || !ID_Chucvu) {
       return res.status(400).json({
@@ -126,7 +127,7 @@ exports.register = async (req, res, next) => {
         [Op.and]: [
           { UserName: UserName },
           { Email: Email },
-          { ID_Duan: userData.ID_Duan },
+          {ID_Duan: ID_Duan}
         ],
       },
       attributes: [
@@ -162,7 +163,7 @@ exports.register = async (req, res, next) => {
       Email: Email,
       Password: await hashSync(Password, salt),
       ID_Chucvu: ID_Chucvu,
-      ID_Duan: userData.ID_Duan || null,
+      ID_Duan: ID_Duan || null,
       Hoten: Hoten || null,
       Sodienthoai: Sodienthoai || null,
       Gioitinh: Gioitinh || null,
