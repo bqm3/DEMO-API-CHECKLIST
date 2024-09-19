@@ -550,7 +550,7 @@ exports.getThongKe = async (req, res, next) => {
     if (userData) {
       const fromDate = req.body.fromDate;
       const toDate = req.body.toDate;
-      const ID_Calv = req.body.ID_Toanha;
+      const ID_Calv = req.body.ID_Calv;
       const orConditions = [
         {
           Ngay: { [Op.between]: [fromDate, toDate] }, // Filter by Ngay attribute between fromDate and toDate
@@ -566,7 +566,7 @@ exports.getThongKe = async (req, res, next) => {
 
       if (ID_Calv !== null && ID_Calv !== undefined) {
         orConditions.push({
-          "$ent_checklist.ID_Calv$": ID_Calv,
+          "$tb_checklistc.ID_Calv$": ID_Calv,
         });
       }
       const page = parseInt(req.query.page) || 0;
