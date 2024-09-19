@@ -842,11 +842,12 @@ exports.uploadFileUsers = async (req, res) => {
         }
         const salt = genSaltSync(10);
         const dataInsert = {
-          ID_Duan: userData.ID_Toanha,
+          ID_Duan: userData.ID_Duan,
           ID_Chucvu: dataChucvu.ID_Chucvu,
           ID_KhoiCV: dataKhoiCV.ID_KhoiCV,
-          Password: await hashSync(matKhau, salt),
+          Password: await hashSync(`${matKhau}`, salt),
           Email: gmail,
+          UserName: taiKhoan,
           Hoten: hoTen,
           Gioitinh: gioiTinh,
           Sodienthoai: soDienThoai,
@@ -854,7 +855,7 @@ exports.uploadFileUsers = async (req, res) => {
           isDelete: 0,
         };
 
-        Ent_user.create(dataInsert, {
+        await Ent_user.create(dataInsert, {
           transaction,
         });
       }
