@@ -327,13 +327,15 @@ exports.delete = async (req, res) => {
 
 exports.dashboardByDuAn = async (req, res) => {
   try {
-    const userData = req.user.data;
     const year = req.query.year || new Date().getFullYear();
     const tangGiam = "desc"; // Thứ tự sắp xếp
+    const userData = req.user.data;
+    const projectList = req.query.projects || []; // List of projects from request
 
     // Xây dựng điều kiện where cho truy vấn
     let whereClause = {
       isDelete: 0,
+      '$ent_hangmuc.ent_khuvuc.ent_toanha.ID_Duan$':userData.ID_Duan,
     };
 
     if (year) {
@@ -355,7 +357,6 @@ exports.dashboardByDuAn = async (req, res) => {
         "Ngayxuly",
         "isDelete",
       ],
-      where: whereClause,
       include: [
         {
           model: Ent_hangmuc,
@@ -369,6 +370,7 @@ exports.dashboardByDuAn = async (req, res) => {
           include: [
             {
               model: Ent_khuvuc,
+              required: true, // Bỏ qua nếu ent_khuvuc là null
               attributes: [
                 "Tenkhuvuc",
                 "MaQrCode",
@@ -380,7 +382,7 @@ exports.dashboardByDuAn = async (req, res) => {
               include: [
                 {
                   model: Ent_toanha,
-                  attributes: ["Toanha", "ID_Toanha"],
+                  attributes: ["Toanha", "ID_Toanha", "ID_Duan"],
                   include: {
                     model: Ent_duan,
                     attributes: [
@@ -391,24 +393,14 @@ exports.dashboardByDuAn = async (req, res) => {
                       "Kinhdo",
                       "Logo",
                     ],
-                    where: { ID_Duan: userData.ID_Duan },
                   },
-                },
-                {
-                  model: Ent_khuvuc_khoicv,
-                  attributes: ["ID_KhoiCV", "ID_Khuvuc", "ID_KV_CV"],
-                  include: [
-                    {
-                      model: Ent_khoicv,
-                      attributes: ["KhoiCV", "Ngaybatdau", "Chuky"],
-                    },
-                  ],
                 },
               ],
             },
           ],
         },
       ],
+      where: whereClause,
     });
 
     // Tạo đối tượng để lưu số lượng sự cố theo trạng thái và tháng
