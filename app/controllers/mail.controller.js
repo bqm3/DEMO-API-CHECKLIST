@@ -23,7 +23,6 @@ const transporter = nodemailer.createTransport({
 
 exports.main = async (req, res) => {
   try {
-    // Calculate the date for the filter (3 days ago)
     const dateFix = () => {
       let d = new Date();
       d.setDate(d.getDate() - 3);
@@ -31,7 +30,6 @@ exports.main = async (req, res) => {
     };
     const dateFormat = dateFix().toISOString().split("T")[0];
 
-    // Define filter criteria for incidents
     const whereList = {
       isDelete: 0,
       Ngaysuco: {
@@ -40,7 +38,6 @@ exports.main = async (req, res) => {
       Tinhtrangxuly: 0,
     };
 
-    // Fetch incidents
     const dataSuCoNgoai = await Tb_sucongoai.findAll({
       attributes: [
         "ID_Suco",
@@ -52,6 +49,7 @@ exports.main = async (req, res) => {
         "Tinhtrangxuly",
         "Ngayxuly",
         "isDelete",
+        "Duongdancacanh",
       ],
       include: [
         {
@@ -95,9 +93,15 @@ exports.main = async (req, res) => {
       where: whereList,
     });
 
-    // Fetch project managers (directors)
     const dataUser = await Ent_user.findAll({
-      attributes: ["ID_Duan", "Email", "Hoten", "UserName", "ID_Chucvu", "isDelete"],
+      attributes: [
+        "ID_Duan",
+        "Email",
+        "Hoten",
+        "UserName",
+        "ID_Chucvu",
+        "isDelete",
+      ],
       include: [
         {
           model: Ent_duan,
@@ -111,12 +115,11 @@ exports.main = async (req, res) => {
       where: {
         isDelete: 0,
         ID_Chucvu: {
-          [Op.in]: [2, 3], // Directors/Managers
+          [Op.in]: [2, 3],
         },
       },
     });
 
-    // Group incidents by project (ID_Duan)
     const incidentsByProject = {};
     dataSuCoNgoai.forEach((incident) => {
       const projectId = incident.ent_hangmuc.ent_khuvuc.ent_toanha.ID_Duan;
@@ -126,31 +129,42 @@ exports.main = async (req, res) => {
       incidentsByProject[projectId].push(incident);
     });
 
-    // Send emails for each project
     for (const projectId in incidentsByProject) {
-      // Find email recipients for the project
       const recipients = dataUser
         .filter((user) => user.ID_Duan === parseInt(projectId))
         .map((user) => user.Email);
 
       if (recipients.length > 0) {
-        // Create email body with incidents
         const projectIncidents = incidentsByProject[projectId]
-          .map(
-            (incident, index) => `
-            <div>
-              <h3>Sự cố thứ: ${index+1}</h3>
-              <p>Khu vực: ${incident.ent_hangmuc.ent_khuvuc.Tenkhuvuc}</p>
-              <p>Hạng mục: ${incident.ent_hangmuc.Hangmuc}</p>
-              <p>Người gửi sự cố: ${incident.ent_user.Hoten}</p>
-              <p>Ngày báo cáo: ${incident.Ngaysuco}</p>
-              <p>Nội dung: ${incident.Noidungsuco}</p>
-              <p>Tình trạng: Chưa xử lý</p>
-            </div>`
-          )
+          .map((incident, index) => {
+            // Handle image URLs
+            const imageLinks = incident.Duongdancacanh
+              ? `<div style="display: flex; flex-wrap: wrap; gap: 20px;">` +
+                incident.Duongdancacanh.split(",")
+                  .map((key) => {
+                    const imageUrl = `https://lh3.googleusercontent.com/d/${key}=s1000?authuser=0`;
+                    return `<a href="${imageUrl}" target="_blank">
+                  <img src="${imageUrl}" alt="Incident Image" style="max-width: 200px; margin-right: 20px" />
+                </a>`;
+                  })
+                  .join("") +
+                `</div>`
+              : "No images available";
+
+            return `
+              <div>
+                <h3>Sự cố thứ: ${index + 1}</h3>
+                <p>Khu vực: ${incident.ent_hangmuc.ent_khuvuc.Tenkhuvuc}</p>
+                <p>Hạng mục: ${incident.ent_hangmuc.Hangmuc}</p>
+                <p>Người gửi sự cố: ${incident.ent_user.Hoten}</p>
+                <p>Ngày báo cáo: ${incident.Ngaysuco}</p>
+                <p>Nội dung: ${incident.Noidungsuco}</p>
+                <p>Hình ảnh: ${imageLinks}</p>
+                <p>Tình trạng: Chưa xử lý</p>
+              </div>`;
+          })
           .join("");
 
-        // Send email
         const info = await transporter.sendMail({
           from: "PMC Checklist thông báo sự cố <phongsohoa.pmc57@gmail.com>",
           to: recipients.join(","),
@@ -162,7 +176,6 @@ exports.main = async (req, res) => {
       }
     }
 
-    // Send response back to client
     res.status(200).json({
       message: "Đã gửi báo cáo sự cố cho các dự án",
       dataSuco: dataSuCoNgoai,

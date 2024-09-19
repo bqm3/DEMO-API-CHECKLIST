@@ -280,7 +280,7 @@ exports.updateUser = async (req, res) => {
     let updateData = {
       ID_Duan,
       ID_Chucvu,
-      ID_KhoiCV: (ID_KhoiCV === null || ID_KhoiCV === "") ? null : ID_KhoiCV,
+      ID_KhoiCV: ID_KhoiCV === null || ID_KhoiCV === "" ? null : ID_KhoiCV,
       UserName,
       Hoten,
       Sodienthoai,
@@ -735,5 +735,139 @@ exports.notiPush = async (message) => {
   } catch (error) {
     console.error("Error sending notifications:", error);
     return res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+exports.uploadFileUsers = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).send("No file uploaded.");
+    }
+    const userData = req.user.data;
+
+    // Read the uploaded Excel file from buffer
+    const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+
+    // Extract data from the first sheet
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(worksheet);
+
+    await sequelize.transaction(async (transaction) => {
+      const removeSpacesFromKeys = (obj) => {
+        return Object.keys(obj).reduce((acc, key) => {
+          const newKey = key?.replace(/\s+/g, "")?.toUpperCase();
+          acc[newKey] = obj[key];
+          return acc;
+        }, {});
+      };
+
+      for (const item of data) {
+        const transformedItem = removeSpacesFromKeys(item);
+
+        const tenKhoiCongViec = transformedItem["KHỐICÔNGVIỆC"];
+        const duAn = transformedItem["DỰÁN"];
+        const hoTen = transformedItem["HỌTÊN"];
+        const gioiTinh = transformedItem["GIỚITÍNH"];
+        const namSinh = transformedItem["NĂMSINH"];
+        const soDienThoai = transformedItem["SỐĐIỆNTHOẠI"];
+        const chucVu = transformedItem["CHỨCVỤ"];
+        const gmail = transformedItem["GMAIL"];
+        const taiKhoan = transformedItem["TÀIKHOẢN"];
+        const matKhau = transformedItem["MẬTKHẨU"];
+
+        const sanitizedTenToanha = duAn?.replace(/\t/g, ""); // Loại bỏ tất cả các ký tự tab
+
+        const dataChucvu = await Ent_chucvu.findOne({
+          attributes: ["ID_Chucvu", "Chucvu", "isDelete"],
+
+          where: {
+            Chucvu: sequelize.where(
+              sequelize.fn("UPPER", sequelize.col("Chucvu")),
+              "LIKE",
+              chucVu.toUpperCase()
+            ),
+            isDelete: 0,
+          },
+        });
+        if (!dataChucvu) {
+          return res.status(500).json({
+            message: "Không tìm chức vụ phù hợp",
+          });
+        }
+
+        const dataKhoiCV = await Ent_khoicv.findOne({
+          attributes: ["ID_KhoiCV", "KhoiCV", "isDelete"],
+
+          where: {
+            KhoiCV: sequelize.where(
+              sequelize.fn("UPPER", sequelize.col("KhoiCV")),
+              "LIKE",
+              tenKhoiCongViec.toUpperCase()
+            ),
+            isDelete: 0,
+          },
+        });
+        if (!dataKhoiCV) {
+          return res.status(500).json({
+            message: "Không tìm khối công việc phù hợp",
+          });
+        }
+
+        
+        const dataUser = await Ent_user.findOne({
+          attributes: [
+            "ID_User",
+            "ID_Duan",
+            "ID_Chucvu",
+            "ID_KhoiCV",
+            "isDelete",
+            "Hoten",
+            "UserName",
+            "Email",
+          ],
+          where: {
+            UserName: taiKhoan,
+            ID_Duan: userData.ID_Duan,
+            isDelete: 0,
+          },
+          transaction,
+        });
+
+        if (dataUser) {
+          console.log(`User đã tồn tại, bỏ qua`);
+          continue; // Skip the current iteration and move to the next item
+        }
+
+        const hashedNewPassword = await hashSync(matKhau, 10);
+        const dataInsert = {
+          ID_Duan: userData.ID_Toanha,
+          ID_Chucvu: dataChucvu.ID_Chucvu,
+          ID_KhoiCV: dataKhoiCV.ID_KhoiCV,
+          Password: hashedNewPassword,
+          Email: gmail,
+          Hoten: hoTen,
+          Gioitinh: gioiTinh,
+          Sodienthoai: soDienThoai,
+          Ngaysinh: namSinh,
+          isDelete: 0,
+        };
+
+        await Ent_user.create(dataInsert, {
+          transaction,
+        });
+      }
+    });
+
+    res.send({
+      message: "File uploaded and data processed successfully",
+      data,
+    });
+  } catch (err) {
+    console.error("Error at line", err.stack.split("\n")[1].trim());
+    return res.status(500).json({
+      message: err.message || "Lỗi! Vui lòng thử lại sau.",
+      error: err.stack,
+    });
   }
 };

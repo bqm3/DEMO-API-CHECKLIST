@@ -38,8 +38,10 @@ module.exports = (app) => {
   router.get("/top3", tb_checklistc.topCompletionRate);
   router.get("/list-checklist-error", tb_checklistc.getChecklistsErrorFromYesterday);
   router.get("/list-project-none", tb_checklistc.getProjectsChecklistStatus);
+  router.get("/quan-ly-vi-tri", tb_checklistc.getLocationsChecklist);
   router.get("/ti-le-hoan-thanh", tb_checklistc.tiLeHoanThanh);
   router.get("/ti-le-su-co", tb_checklistc.tiLeSuco);
+  // list-project-none
   //==========================================
 
   router.get("/list-checklist-error-project", [isAuthenticated], tb_checklistc.getChecklistsErrorFromWeekbyDuan)

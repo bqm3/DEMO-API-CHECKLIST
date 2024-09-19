@@ -47,6 +47,8 @@ exports.create = async (req, res) => {
 
 exports.get = async (req, res) => {
   try {
+
+    const userData = req.user.data;
     await Ent_duan_khoicv.findAll({
       attributes: [
         "ID_Duan_KhoiCV",
@@ -73,7 +75,8 @@ exports.get = async (req, res) => {
         },
       ],
       where: {
-        isDelete: 0
+        isDelete: 0,
+        ID_Duan: userData.ID_Duan
       }
     })
       .then((data) => {
