@@ -41,7 +41,7 @@ exports.create = async (req, res) => {
     const data = {
       Ngaysuco: Ngaysuco || null,
       Giosuco: Giosuco || null,
-      ID_Hangmuc: ID_Hangmuc,
+      ID_Hangmuc: ID_Hangmuc || null,
       Noidungsuco: Noidungsuco || null,
       Tinhtrangxuly: Tinhtrangxuly || null,
       Duongdancacanh: idsString || null,
