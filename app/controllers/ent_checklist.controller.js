@@ -1947,7 +1947,6 @@ exports.uploadFiles = async (req, res) => {
           const tenHangmuc = transformedItem["TÊNHẠNGMỤC"];
           const tenTang = transformedItem["TÊNTẦNG"];
           const tenKhoiCongViec = transformedItem["TÊNKHỐICÔNGVIỆC"];
-          const caChecklist = transformedItem["CACHECKLIST"];
           const sttChecklist = transformedItem["STT"];
           const maChecklist = transformedItem["MÃCHECKLIST"];
           const tenChecklist = transformedItem["TÊNCHECKLIST"];
@@ -1957,7 +1956,7 @@ exports.uploadFiles = async (req, res) => {
           const quanTrong = transformedItem["QUANTRỌNG"];
           const ghiChu = transformedItem["GHICHÚ"];
 
-          if (!tenChecklist || !caChecklist) {
+          if (!tenChecklist ) {
             console.log("Bỏ qua do thiếu tên checklist");
             continue;
           }

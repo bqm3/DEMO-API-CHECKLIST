@@ -41,9 +41,9 @@ exports.create = async (req, res) => {
     const data = {
       Ngaysuco: Ngaysuco || null,
       Giosuco: Giosuco || null,
-      ID_Hangmuc: ID_Hangmuc || null,
+      ID_Hangmuc: (`${ID_Hangmuc}` !== 'null' && `${ID_Hangmuc}` !== 'undefined') ? ID_Hangmuc : null,
       Noidungsuco: Noidungsuco || null,
-      Tinhtrangxuly: Tinhtrangxuly || null,
+      Tinhtrangxuly: 0,
       Duongdancacanh: idsString || null,
       ID_User: ID_User,
     };
@@ -135,8 +135,8 @@ exports.get = async (req, res) => {
       },
       order: [
         ["Tinhtrangxuly", "ASC"],
-        ["Ngayxuly", "DESC"],
         ["Ngaysuco", "DESC"],
+        ["Ngayxuly", "DESC"],
       ],
     });
 
