@@ -3805,7 +3805,7 @@ exports.createExcelTongHopCa = async (req, res) => {
     const endDateFormat = formatDate(endDate);
 
     const workbook = new ExcelJS.Workbook();
-    if (keyCreate == 4) {
+    if (keyCreate == 1) {
       const worksheet = workbook.addWorksheet("Tổng hợp ca Checklist");
 
       let whereClause = {

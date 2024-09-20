@@ -181,8 +181,8 @@ exports.updateStatus = async (req, res) => {
           Tinhtrangxuly: Tinhtrangxuly,
           Ngayxuly: ngayXuLy,
           Anhkiemtra: idsString,
-          Ghichu: Ghichu || null,
-          ID_Hangmuc: (`${ID_Hangmuc}` == 'null' || `${ID_Hangmuc}` == 'undefined') ? ID_Hangmuc : null
+          Ghichu: (`${Ghichu}` !== 'null' && `${Ghichu}` !== 'undefined') ? Ghichu : null,
+          ID_Hangmuc: (`${ID_Hangmuc}` !== 'null' && `${ID_Hangmuc}` !== 'undefined') ? ID_Hangmuc : null
         },
         {
           where: {
