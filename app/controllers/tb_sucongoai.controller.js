@@ -174,7 +174,7 @@ exports.updateStatus = async (req, res) => {
 
     // Nối các id lại thành chuỗi, cách nhau bằng dấu phẩy
     const idsString = ids.join(",");
-    const { Tinhtrangxuly, ngayXuLy, Ghichu } = req.body;
+    const { Tinhtrangxuly, ngayXuLy, Ghichu, ID_Hangmuc } = req.body;
     if (ID_Suco && userData) {
       Tb_sucongoai.update(
         {
@@ -182,6 +182,7 @@ exports.updateStatus = async (req, res) => {
           Ngayxuly: ngayXuLy,
           Anhkiemtra: idsString,
           Ghichu: Ghichu || null,
+          ID_Hangmuc: (`${ID_Hangmuc}` == 'null' || `${ID_Hangmuc}` == 'undefined') ? ID_Hangmuc : null
         },
         {
           where: {
