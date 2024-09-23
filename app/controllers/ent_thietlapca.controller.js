@@ -38,7 +38,8 @@ exports.create = async (req, res) => {
       ],
       where: {
         ID_Calv: ID_Calv,
-        Ngaythu: Ngaythu
+        Ngaythu: Ngaythu,
+        isDelete: 0
       }
     })
 

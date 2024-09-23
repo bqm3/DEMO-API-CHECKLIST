@@ -15,6 +15,7 @@ module.exports = (app) => {
   router.put("/delete/:id", [isAuthenticated], tb_sucongoai.delete);
   router.get("/dashboard-by-duan", [isAuthenticated], tb_sucongoai.dashboardByDuAn);
   router.get("/dashboard", tb_sucongoai.dashboardAll);
+  router.get("/su-co-ngoai", tb_sucongoai.getSucoNam);
   
   app.use("/api/tb_sucongoai", router);
 };
