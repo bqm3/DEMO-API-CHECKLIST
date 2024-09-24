@@ -26,7 +26,7 @@ exports.create = (req, res) => {
       Gioht,
     } = req.body;
 
-    if (!Description) {
+    if (!Description || !Gioht) {
       res.status(400).json({
         message: "Không thể checklist dữ liệu!",
       });
@@ -43,8 +43,6 @@ exports.create = (req, res) => {
       ID_ChecklistC: ID_ChecklistC || null,
       isDelete: 0,
     };
-
-    console.log("data", data);
 
     // Save Tb_checklistchitietdone in the database
     Tb_checklistchitietdone.create(data)

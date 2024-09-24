@@ -29,7 +29,7 @@ module.exports = (app) => {
   // Xuất báo cáo
   //==================================
   router.post("/cac-loai-bao-cao/:id", [isAuthenticated], tb_checklistc.createExcelTongHopCa);
-  router.post("/thong-ke-tra-cucu", [isAuthenticated], tb_checklistc.createExcelThongKeTraCuu);
+  router.post("/thong-ke-tra-cuu", [isAuthenticated], tb_checklistc.createExcelThongKeTraCuu);
   router.post("/baocao", [isAuthenticated], tb_checklistc.createExcelFile);
   router.post("/thong-ke", [isAuthenticated], tb_checklistc.getThongKe);
   

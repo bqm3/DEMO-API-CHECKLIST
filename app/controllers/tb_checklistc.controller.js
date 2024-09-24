@@ -95,8 +95,6 @@ exports.createFirstChecklist = async (req, res, next) => {
       ngayCheck = Math.abs(remainder);
     }
 
-    console.log("ngayCheck", ngayCheck);
-
     if (!calvData) {
       return res.status(400).json({
         message: "Ca làm việc không tồn tại!",
@@ -129,7 +127,6 @@ exports.createFirstChecklist = async (req, res, next) => {
         });
       }
     } else {
-      // Nếu khoảng thời gian không qua nửa đêm, sử dụng logic thông thường
       if (
         !giobdMoment.isBetween(giobatdauMoment, gioketthucMoment, null, "[]")
       ) {
@@ -195,11 +192,13 @@ exports.createFirstChecklist = async (req, res, next) => {
             "ID_Hangmuc",
             "ID_Khuvuc",
             "FileTieuChuan",
+            "isDelete",
           ],
           where: {
             ID_Hangmuc: {
               [Op.in]: thietlapcaData.ID_Hangmucs,
             },
+            isDelete: 0
           },
         },
         {
@@ -238,6 +237,9 @@ exports.createFirstChecklist = async (req, res, next) => {
               },
             },
           ],
+          where: {
+            isDelete: 0
+          }
         },
         {
           model: Ent_user,
@@ -1064,6 +1066,7 @@ exports.checklistCalv = async (req, res) => {
       let whereClause = {
         isDelete: 0,
         ID_ChecklistC: ID_ChecklistC,
+        ID_Duan: userData.ID_Duan
       };
 
       // Fetch checklist detail items
@@ -1089,6 +1092,7 @@ exports.checklistCalv = async (req, res) => {
               "Giokt",
               "ID_KhoiCV",
               "ID_Calv",
+              "ID_Duan"
             ],
             where: whereClause,
             include: [
@@ -1103,6 +1107,10 @@ exports.checklistCalv = async (req, res) => {
               {
                 model: Ent_calv,
                 attributes: ["Tenca", "Giobatdau", "Gioketthuc"],
+              },
+              {
+                model: Ent_duan,
+                attributes: ["Duan"],
               },
             ],
           },
@@ -1155,7 +1163,6 @@ exports.checklistCalv = async (req, res) => {
                         "Kinhdo",
                         "Logo",
                       ],
-                      where: { ID_Duan: userData.ID_Duan },
                     },
                   },
                   {
@@ -1212,7 +1219,6 @@ exports.checklistCalv = async (req, res) => {
           const idChecklists = item.Description.split(",").map(Number);
           checklistIds.push(...idChecklists);
         });
-        // });
       }
 
       // Fetch related checklist data

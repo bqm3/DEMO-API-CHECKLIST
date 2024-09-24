@@ -68,6 +68,7 @@ exports.create = async (req, res) => {
     });
   }
 };
+
 exports.get = async (req, res) => {
   try {
     const userData = req.user.data;
@@ -119,8 +120,6 @@ exports.get = async (req, res) => {
                 "Kinhdo",
                 "Logo",
               ],
-
-              where: { ID_Duan: userData.ID_Duan },
             },
             {
               model: Ent_chucvu,
@@ -143,7 +142,12 @@ exports.get = async (req, res) => {
       ],
     });
 
-    if (!data || data.length === 0) {
+    const filteredData = data.filter((item) => {
+      return item.ent_user && item.ent_user.ID_Duan == userData.ID_Duan;
+    });
+
+
+    if (!filteredData || filteredData.length === 0) {
       return res.status(200).json({
         message: "Không có sự cố ngoài!",
         data: [],
@@ -152,7 +156,7 @@ exports.get = async (req, res) => {
 
     return res.status(200).json({
       message: "Sự cố ngoài!",
-      data: data,
+      data: filteredData,
     });
   } catch (error) {
     res.status(500).json({
@@ -598,19 +602,19 @@ exports.dashboardAll = async (req, res) => {
 
 exports.getSucoNam = async (req, res) => {
   try {
-    const year = req.query.year || new Date().getFullYear(); // Default to the current year
+    // const year = req.query.year || new Date().getFullYear(); // Default to the current year
     const name = req.query.name;
 
     let whereClause = {
       isDelete: 0,
     };
 
-    if (year) {
-      whereClause.Ngaysuco = {
-        [Op.gte]: `${year}-01-01`,
-        [Op.lte]: `${year}-12-31`,
-      };
-    }
+    // if (year) {
+    //   whereClause.Ngaysuco = {
+    //     [Op.gte]: `${year}-01-01`,
+    //     [Op.lte]: `${year}-12-31`,
+    //   };
+    // }
 
     const data = await Tb_sucongoai.findAll({
       attributes: [

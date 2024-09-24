@@ -1631,6 +1631,14 @@ exports.getListChecklistWeb = async (req, res) => {
         .json({ message: "Không tìm thấy thông tin người dùng." });
     }
 
+    const whereCondition = {
+      isDelete: 0
+    }
+
+    if(userData){
+      whereCondition["$ent_khuvuc.ent_toanha.ID_Duan$"] = userData?.ID_Duan;
+    }
+
     const data = await Ent_checklist.findAll({
       attributes: [
         "ID_Checklist",
@@ -1682,7 +1690,6 @@ exports.getListChecklistWeb = async (req, res) => {
             {
               model: Ent_toanha,
               attributes: ["Toanha", "ID_Toanha", "ID_Duan"],
-              where: { ID_Duan: userData.ID_Duan },
             },
             {
               model: Ent_khuvuc_khoicv,
@@ -1709,9 +1716,7 @@ exports.getListChecklistWeb = async (req, res) => {
           attributes: ["UserName", "Email"],
         },
       ],
-      where: {
-        isDelete: 0,
-      },
+      where: whereCondition,
       order: [
         ["ID_Khuvuc", "ASC"],
         ["Sothutu", "ASC"],
@@ -1724,20 +1729,11 @@ exports.getListChecklistWeb = async (req, res) => {
         data: [],
       });
     }
-
-    const filteredData = data.filter((item) => item.ent_khuvuc !== null);
-
-    if (filteredData.length > 0) {
-      return res.status(200).json({
-        message: "Danh sách checklist!",
-        data: filteredData,
-      });
-    } else {
-      return res.status(200).json({
-        message: "Không còn checklist cho ca làm việc này!",
-        data: [],
-      });
-    }
+    return res.status(200).json({
+      message: "Danh sách checklist!",
+      data: data,
+    });
+   
   } catch (err) {
     return res.status(500).json({
       message: err.message || "Lỗi! Vui lòng thử lại sau.",
