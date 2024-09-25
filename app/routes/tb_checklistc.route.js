@@ -32,6 +32,7 @@ module.exports = (app) => {
   router.post("/thong-ke-tra-cuu", [isAuthenticated], tb_checklistc.createExcelThongKeTraCuu);
   router.post("/baocao", [isAuthenticated], tb_checklistc.createExcelFile);
   router.post("/thong-ke", [isAuthenticated], tb_checklistc.getThongKe);
+  router.post("/thong-ke-hang-muc-quan-trong", [isAuthenticated], tb_checklistc.getThongKeHangMucQuanTrong);
   
   // Role: VIP
   //========================================== 
@@ -42,9 +43,12 @@ module.exports = (app) => {
   router.get("/quan-ly-vi-tri", tb_checklistc.getLocationsChecklist);
   router.get("/ti-le-hoan-thanh", tb_checklistc.tiLeHoanThanh);
   router.get("/ti-le-su-co", tb_checklistc.tiLeSuco);
-  // list-project-none
-  //==========================================
 
+  // Role: GDDA
+  //==========================================
+  router.get("/percent-checklist-days", [isAuthenticated], tb_checklistc.getProjectChecklistDays);
+
+  // ===========================================
   router.get("/list-checklist-error-project", [isAuthenticated], tb_checklistc.getChecklistsErrorFromWeekbyDuan)
   router.get("/list-checklist", [isAuthenticated], tb_checklistc.getChecklistsError)
   router.get("/year", [isAuthenticated], tb_checklistc.checklistYearByKhoiCV);

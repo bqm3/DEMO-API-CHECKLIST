@@ -434,6 +434,7 @@ exports.getKhuVucFilter = async (req, res) => {
               "ID_Khuvuc",
               "Hangmuc",
               "isDelete",
+              "Important",
               "Tieuchuankt",
               "FileTieuChuan",
             ],
