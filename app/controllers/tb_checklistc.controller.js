@@ -837,45 +837,40 @@ exports.getThongKeHangMucQuanTrong = async (req, res, next) => {
       { header: "Hướng xử lý", key: "huong_xuly", width: 25 },
     ];
 
-    const projectData =
-    dataHangMucImportant ? dataHangMucImportant[0].ent_khuvuc.ent_toanha.ent_duan : {};
-      const projectName = projectData?.Duan || "";
-      const projectLogo =
-        projectData?.Logo || "https://pmcweb.vn/wp-content/uploads/logo.png";
+    const projectData = dataHangMucImportant
+      ? dataHangMucImportant[0].ent_khuvuc.ent_toanha.ent_duan
+      : {};
+    const projectName = projectData?.Duan || "";
+    const projectLogo =
+      projectData?.Logo || "https://pmcweb.vn/wp-content/uploads/logo.png";
 
-      // Download the image and add it to the workbook
-      const imageResponse = await axios({
-        url: projectLogo,
-        responseType: "arraybuffer",
-      });
+    // Download the image and add it to the workbook
+    const imageResponse = await axios({
+      url: projectLogo,
+      responseType: "arraybuffer",
+    });
 
-      const imageBuffer = Buffer.from(imageResponse.data, "binary");
-      const imageId = workbook.addImage({
-        buffer: imageBuffer,
-        extension: "png",
-      });
+    const imageBuffer = Buffer.from(imageResponse.data, "binary");
+    const imageId = workbook.addImage({
+      buffer: imageBuffer,
+      extension: "png",
+    });
 
-      worksheet.mergeCells("A1:B1");
-      worksheet.getCell("A1").alignment = {
-        horizontal: "center",
-        vertical: "middle",
-        wrapText: true
-      };
-      worksheet.addImage(imageId, {
-        tl: { col: 0, row: 0 }, // Position for the image within the merged cells
-        ext: { width: 120, height: 60 },
-      });
-      worksheet.getRow(1).height = 60; 
-      worksheet.getRow(2).height = 50; 
-      // Set project name in the merged cell A1:B1
-      worksheet.mergeCells("A2:B2");
-      worksheet.getCell("A2").value = projectName; // Đặt tên dự án vào ô A2
-      worksheet.getCell("A2").alignment = {
-        horizontal: "center",
-        vertical: "middle",
-        wrapText: true
-      };
-      worksheet.getCell("A2").font = { size: 14, bold: true }; // Định dạng tên dự án
+    worksheet.addImage(imageId, {
+      tl: { col: 0, row: 0 }, // Position for the image within the merged cells
+       br: { col: 2, row: 1 },
+    });
+    worksheet.getRow(1).height = 60;
+    worksheet.getRow(2).height = 50;
+    // Set project name in the merged cell A1:B1
+    worksheet.mergeCells("A2:B2");
+    worksheet.getCell("A2").value = projectName; // Đặt tên dự án vào ô A2
+    worksheet.getCell("A2").alignment = {
+      horizontal: "center",
+      vertical: "middle",
+      wrapText: true,
+    };
+    worksheet.getCell("A2").font = { size: 14, bold: true }; // Định dạng tên dự án
 
     worksheet.mergeCells("C1:G1");
     const headerRow = worksheet.getCell("C1");
@@ -894,9 +889,7 @@ exports.getThongKeHangMucQuanTrong = async (req, res, next) => {
     worksheet.getCell("C2").font = { size: 13, bold: true };
 
     worksheet.mergeCells("C3:G3");
-    worksheet.getCell(
-      "C3"
-    ).value = `Tên bộ phận: ${tenBoPhan}`;
+    worksheet.getCell("C3").value = `Tên bộ phận: ${tenBoPhan}`;
     worksheet.getCell("C3").alignment = {
       horizontal: "center",
       vertical: "middle",
@@ -927,7 +920,7 @@ exports.getThongKeHangMucQuanTrong = async (req, res, next) => {
         right: { style: "thin" },
       };
     });
-    
+
     // Thêm dữ liệu vào bảng
     dataHangMucImportant.forEach((item, index) => {
       // Lấy thông tin lỗi từ bảng checklist chi tiết
@@ -1998,7 +1991,15 @@ exports.checklistYearByKhoiCV = async (req, res) => {
 
     // Fetch the checklist data with shift (Calv) information
     const relatedChecklists = await Tb_checklistc.findAll({
-      attributes: ["ID_KhoiCV", "Ngay", "TongC", "Tong", "ID_Calv", "isDelete"],
+      attributes: [
+        "ID_KhoiCV",
+        "Ngay",
+        "TongC",
+        "Tong",
+        "ID_Calv",
+        "isDelete",
+        "ID_Duan",
+      ],
       where: whereClause,
       include: [
         {
@@ -3634,9 +3635,9 @@ exports.getProjectChecklistDays = async (req, res) => {
 
       // Lưu tỷ lệ hoàn thành của từng người
       const userCompletionRate = (checklistC.TongC / checklistC.Tong) * 100;
-      result[date].createdKhois[khoiName].shifts[shiftName].userCompletionRates.push(
-        userCompletionRate
-      );
+      result[date].createdKhois[khoiName].shifts[
+        shiftName
+      ].userCompletionRates.push(userCompletionRate);
     });
 
     // Tính toán phần trăm hoàn thành riêng cho từng ca và tổng khối
@@ -3677,10 +3678,11 @@ exports.getProjectChecklistDays = async (req, res) => {
       data: resultArray,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message || "Lỗi! Vui lòng thử lại sau." });
+    res
+      .status(500)
+      .json({ message: err.message || "Lỗi! Vui lòng thử lại sau." });
   }
 };
-
 
 exports.getLocationsChecklist = async (req, res) => {
   try {
@@ -4297,13 +4299,6 @@ exports.createExcelTongHopCa = async (req, res) => {
         responseType: "arraybuffer",
       });
       const imageBuffer = Buffer.from(imageResponse.data, "binary");
-      // Merge cells A1 and B1
-      worksheet.mergeCells("A1:B1");
-      worksheet.getCell("A1").alignment = {
-        horizontal: "center",
-        vertical: "middle",
-        wrapText: true
-      };
 
       // Add image to the merged cells A1:B1
       const imageId = workbook.addImage({
@@ -4311,34 +4306,34 @@ exports.createExcelTongHopCa = async (req, res) => {
         extension: "png",
       });
       worksheet.addImage(imageId, {
-        tl: { col: 0, row: 0 }, // Position for the image within the merged cells
-        ext: { width: 120, height: 60 },
+        tl: { col: 0, row: 0 },
+        br: { col: 2, row: 1 }, // Bottom-right position (B1)
       });
-      worksheet.getRow(1).height = 60; // Tăng chiều cao hàng để tránh bị che
-      worksheet.getRow(2).height = 50; // Tăng chiều cao hàng để tránh bị che
-      // Set project name in the merged cell A1:B1
+      worksheet.getRow(1).height = 60; // Adjust row height to fit the image
+      worksheet.getRow(2).height = 50; // Adjust row height
+
+      // Merge cells A2:B2 for the project name
       worksheet.mergeCells("A2:B2");
-      worksheet.getCell("A2").value = projectName; // Đặt tên dự án vào ô A2
+      worksheet.getCell("A2").value = projectName; // Set project name in A2
       worksheet.getCell("A2").alignment = {
         horizontal: "center",
         vertical: "middle",
-        wrapText: true
+        wrapText: true,
       };
-      worksheet.getCell("A2").font = { size: 14, bold: true }; // Định dạng tên dự án
+      worksheet.getCell("A2").font = { size: 13, bold: true };
 
-      // Merge cells and set values for the report title
-      worksheet.mergeCells("C1:H1");
-      worksheet.getCell("C1").value =
+      // Merge cells and set values for the report title in row 1 (C1:H1)
+      worksheet.mergeCells("A1:H1");
+      worksheet.getCell("A1").value =
         "BÁO CÁO TỔNG HỢP CA CHECKLIST NGĂN NGỪA RỦI RO";
-      worksheet.getCell("C1").alignment = {
+      worksheet.getCell("A1").alignment = {
         horizontal: "center",
         vertical: "middle",
-        wrapText: true, // Bật wrap text
+        wrapText: true,
       };
-      worksheet.getCell("C1").font = { size: 16, bold: true };
-      worksheet.getCell("C2").font = { size: 13, bold: true };
+      worksheet.getCell("A1").font = { size: 16, bold: true };
 
-      // Merge cells and set values for the date range
+      // Merge cells and set values for the date range in row 2 (C2:H2)
       worksheet.mergeCells("C2:H2");
       worksheet.getCell("C2").value =
         startDateFormat && endDateFormat
@@ -4347,12 +4342,14 @@ exports.createExcelTongHopCa = async (req, res) => {
       worksheet.getCell("C2").alignment = {
         horizontal: "center",
         vertical: "middle",
-        wrapText: true, // Bật wrap text
+        wrapText: true,
       };
+      worksheet.getCell("C1").font = { size: 13, bold: true };
 
+      // Set the table headers starting from row 4
       const tableHeaderRow = worksheet.getRow(4);
       tableHeaderRow.values = [
-        "STT",
+        "STT", // Header "STT" in column A, row 4
         "Ngày",
         "Ca",
         "Bộ phận",
@@ -4366,7 +4363,7 @@ exports.createExcelTongHopCa = async (req, res) => {
         cell.alignment = {
           horizontal: "center",
           vertical: "middle",
-          wrapText: true, // Bật wrap text
+          wrapText: true, // Enable wrap text
         };
         cell.border = {
           top: { style: "thin" },
@@ -4376,44 +4373,36 @@ exports.createExcelTongHopCa = async (req, res) => {
         };
       });
 
+      // Add data rows starting from row 5 (after the headers in row 4)
       Object.keys(aggregatedData).forEach((key, index) => {
         const item = aggregatedData[key];
         const completion = item.TongC;
         const total = item.Tong;
         const completionPercentage =
-          completion >= total ? 100 : ((completion / total) * 100);
+          completion >= total ? 100 : (completion / total) * 100;
         const formattedPercentage = Number.isInteger(completionPercentage)
-          ? completionPercentage.toString() // Chuyển thành chuỗi nếu là số nguyên
-          : completionPercentage.toFixed(2); // Sử dụng toFixed(2) nếu không phải số nguyên
+          ? completionPercentage.toString() // Convert to string if integer
+          : completionPercentage.toFixed(2); // Use toFixed(2) for non-integer
 
         const newRow = worksheet.addRow([
-          index + 1,
-          item.Ngay,
-          item.Tenca,
-          item.KhoiCV,
-          item.Tong,
-          completion,
-          formattedPercentage,
-          item.Ghichu,
+          index + 1, // STT
+          item.Ngay, // Ngày
+          item.Tenca, // Ca
+          item.KhoiCV, // Bộ phận
+          item.Tong, // Tổng phải Checklist
+          completion, // Đã thực hiện
+          formattedPercentage, // Tỷ lệ thực hiện
+          item.Ghichu, // Ghi chú
         ]);
 
-        // Căn giữa và bật wrap text cho từng ô trong hàng vừa thêm
+        // Center align and enable wrap text for each cell in the new row
         newRow.eachCell((cell) => {
           cell.alignment = {
             horizontal: "center",
             vertical: "middle",
-            wrapText: true, // Bật wrap text
+            wrapText: true, // Enable wrap text
           };
         });
-      });
-
-      // Căn giữa và bật wrap text cho tất cả các tiêu đề cột
-      worksheet.getRow(4).eachCell((cell) => {
-        cell.alignment = {
-          horizontal: "center",
-          vertical: "middle",
-          wrapText: true, // Bật wrap text
-        };
       });
 
       const buffer = await workbook.xlsx.writeBuffer();
@@ -4572,7 +4561,7 @@ exports.createExcelTongHopCa = async (req, res) => {
     }
 
     if (keyCreate == 3) {
-      try{
+      try {
         const worksheet = workbook.addWorksheet("BÁO CÁO CHECKLIST CÓ VẤN ĐỀ");
 
         const khoiCVs = await Ent_khoicv.findAll({
@@ -4583,10 +4572,10 @@ exports.createExcelTongHopCa = async (req, res) => {
           },
           attributes: ["ID_KhoiCV", "KhoiCV"], // Get both ID_KhoiCV and KhoiCV name
         });
-  
+
         const dataFilter = khoiCVs.map((item) => item.KhoiCV);
         const tenBoPhan = dataFilter.join();
-  
+
         let whereClause = {
           isDelete: 0,
           ID_Duan: userData.ID_Duan,
@@ -4598,7 +4587,7 @@ exports.createExcelTongHopCa = async (req, res) => {
             [Op.lte]: endDateFormat,
           },
         };
-  
+
         const dataChecklistC = await Tb_checklistchitiet.findAll({
           attributes: [
             "ID_Checklistchitiet",
@@ -4678,12 +4667,12 @@ exports.createExcelTongHopCa = async (req, res) => {
                 {
                   model: Ent_khuvuc,
                   attributes: ["Tenkhuvuc", "MaQrCode", "Makhuvuc", "Sothutu"],
-  
+
                   include: [
                     {
                       model: Ent_toanha,
                       attributes: ["Toanha", "ID_Duan"],
-  
+
                       include: [
                         {
                           model: Ent_duan,
@@ -4729,7 +4718,7 @@ exports.createExcelTongHopCa = async (req, res) => {
             },
           },
         });
-  
+
         worksheet.columns = [
           { header: "STT", key: "stt", width: 5 },
           { header: "Checklist", key: "checklist", width: 15 },
@@ -4741,60 +4730,65 @@ exports.createExcelTongHopCa = async (req, res) => {
           { header: "Nhân viên", key: "nhanvien", width: 10 },
           { header: "Ghi nhận lỗi", key: "ghinhanloi", width: 10 },
           { header: "Thời gian lỗi", key: "thoigianloi", width: 10 },
-          { header: "Đường dẫn ảnh", key: "duongdananh", width: 20, height: 20 },
+          {
+            header: "Đường dẫn ảnh",
+            key: "duongdananh",
+            width: 20,
+            height: 20,
+          },
           { header: "Ghi chú", key: "ghichuloi", width: 20 },
           { header: "Tình trạng xử lý", key: "tinhtrang", width: 10 },
         ];
-  
-        const projectData =
-        dataChecklistC ? dataChecklistC[0].tb_checklistc.ent_duan : {};
-          const projectName = projectData?.Duan || "";
-          const projectLogo =
-            projectData?.Logo || "https://pmcweb.vn/wp-content/uploads/logo.png";
-  
-    
-          // Download the image and add it to the workbook
-          const imageResponse = await axios({
-            url: projectLogo,
-            responseType: "arraybuffer",
-          });
-    
-          const imageBuffer = Buffer.from(imageResponse.data, "binary");
-          // Merge cells A1 and B1
-          worksheet.mergeCells("A1:B1");
-          worksheet.getCell("A1").alignment = {
-            horizontal: "center",
-            vertical: "middle",
-            wrapText: true
-          };
-    
-          // Add image to the merged cells A1:B1
-          const imageId = workbook.addImage({
-            buffer: imageBuffer,
-            extension: "png",
-          });
-          worksheet.addImage(imageId, {
-            tl: { col: 0, row: 0 }, // Position for the image within the merged cells
-            ext: { width: 120, height: 60 },
-          });
-          worksheet.getRow(1).height = 60; 
-          worksheet.getRow(2).height = 50; 
-          // Set project name in the merged cell A1:B1
-          worksheet.mergeCells("A2:B2");
-          worksheet.getCell("A2").value = projectName; // Đặt tên dự án vào ô A2
-          worksheet.getCell("A2").alignment = {
-            horizontal: "center",
-            vertical: "middle",
-            wrapText: true
-          };
-          worksheet.getCell("A2").font = { size: 14, bold: true }; // Định dạng tên dự án
-    
+
+        const projectData = dataChecklistC
+          ? dataChecklistC[0].tb_checklistc.ent_duan
+          : {};
+        const projectName = projectData?.Duan || "";
+        const projectLogo =
+          projectData?.Logo || "https://pmcweb.vn/wp-content/uploads/logo.png";
+
+        // Download the image and add it to the workbook
+        const imageResponse = await axios({
+          url: projectLogo,
+          responseType: "arraybuffer",
+        });
+
+        const imageBuffer = Buffer.from(imageResponse.data, "binary");
+        // Merge cells A1 and B1
+        worksheet.mergeCells("A1:B1");
+        worksheet.getCell("A1").alignment = {
+          horizontal: "center",
+          vertical: "middle",
+          wrapText: true,
+        };
+
+        // Add image to the merged cells A1:B1
+        const imageId = workbook.addImage({
+          buffer: imageBuffer,
+          extension: "png",
+        });
+        worksheet.addImage(imageId, {
+          tl: { col: 0, row: 0 }, // Position for the image within the merged cells
+          ext: { width: 120, height: 60 },
+        });
+        worksheet.getRow(1).height = 60;
+        worksheet.getRow(2).height = 50;
+        // Set project name in the merged cell A1:B1
+        worksheet.mergeCells("A2:B2");
+        worksheet.getCell("A2").value = projectName; // Đặt tên dự án vào ô A2
+        worksheet.getCell("A2").alignment = {
+          horizontal: "center",
+          vertical: "middle",
+          wrapText: true,
+        };
+        worksheet.getCell("A2").font = { size: 13, bold: true }; // Định dạng tên dự án
+
         worksheet.mergeCells("C1:M1");
         const headerRow = worksheet.getCell("C1");
         headerRow.value = "BÁO CÁO CHECKLIST CÓ VẤN ĐỀ";
         headerRow.alignment = { horizontal: "center", vertical: "middle" };
         headerRow.font = { size: 16, bold: true };
-  
+
         worksheet.mergeCells("C2:M2");
         worksheet.getCell("C2").value =
           startDateFormat &&
@@ -4810,9 +4804,7 @@ exports.createExcelTongHopCa = async (req, res) => {
         };
         worksheet.mergeCells("C3:M3");
         worksheet.getCell("C3").value =
-          startDateFormat &&
-          endDateFormat &&
-          `Tên bộ phận: ${tenBoPhan}`;
+          startDateFormat && endDateFormat && `Tên bộ phận: ${tenBoPhan}`;
         worksheet.getCell("C3").alignment = {
           horizontal: "center",
           vertical: "middle",
@@ -4821,7 +4813,7 @@ exports.createExcelTongHopCa = async (req, res) => {
           size: 13,
           bold: true,
         };
-  
+
         const tableHeaderRow = worksheet.getRow(6);
         tableHeaderRow.values = [
           "STT",
@@ -4852,12 +4844,12 @@ exports.createExcelTongHopCa = async (req, res) => {
             wrapText: true,
           }; // Căn giữa và wrap text cho header
         });
-  
+
         // Add data rows
         for (let i = 0; i < dataChecklistC.length; i++) {
           const rowIndex = i + 7; // Adjust for header rows
           const imageUrl = `https://lh3.googleusercontent.com/d/${dataChecklistC[i]?.Anh}=s1000?authuser=0`; // Image URL
-        
+
           // Add text data to the row
           worksheet.addRow([
             i + 1,
@@ -4872,17 +4864,19 @@ exports.createExcelTongHopCa = async (req, res) => {
             dataChecklistC[i]?.Gioht,
             "", // Empty column for image hyperlink
             dataChecklistC[i]?.Ghichu,
-            dataChecklistC[i]?.ent_checklist?.Tinhtrang == 1 ? "Chưa xử lý" : "Đã xử lý",
+            dataChecklistC[i]?.ent_checklist?.Tinhtrang == 1
+              ? "Chưa xử lý"
+              : "Đã xử lý",
           ]);
-        
+
           // Add hyperlink to the image URL
           const row = worksheet.getRow(rowIndex); // Get the row that was just added
           const imageCell = row.getCell(11); // Assuming the 11th cell (change the index if needed)
           imageCell.value = {
-            text: 'Xem ảnh', // Display text for the hyperlink
+            text: "Xem ảnh", // Display text for the hyperlink
             hyperlink: imageUrl, // Hyperlink to the image
           };
-        
+
           // Center align and wrap text for each cell in the row
           row.eachCell({ includeEmpty: true }, (cell) => {
             cell.alignment = {
@@ -4892,11 +4886,10 @@ exports.createExcelTongHopCa = async (req, res) => {
             };
           });
         }
-        
-  
+
         // Generate the Excel file buffer
         const buffer = await workbook.xlsx.writeBuffer();
-  
+
         res.setHeader(
           "Content-Disposition",
           "attachment; filename=Checklist_Report.xlsx"
@@ -4906,10 +4899,10 @@ exports.createExcelTongHopCa = async (req, res) => {
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         );
         res.send(buffer);
-      }catch(error){
+      } catch (error) {
         res.status(500).json({
-          message: error.message || "Loi"
-        })
+          message: error.message || "Loi",
+        });
       }
     }
   } catch (err) {

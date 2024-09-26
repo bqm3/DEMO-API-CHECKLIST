@@ -344,12 +344,11 @@ exports.dashboardByDuAn = async (req, res) => {
     const year = req.query.year || new Date().getFullYear();
     const tangGiam = "desc"; // Thứ tự sắp xếp
     const userData = req.user.data;
-    const projectList = req.query.projects || []; // List of projects from request
 
     // Xây dựng điều kiện where cho truy vấn
     let whereClause = {
       isDelete: 0,
-      "$ent_hangmuc.ent_khuvuc.ent_toanha.ID_Duan$": userData.ID_Duan,
+      "$ent_user.ID_Duan$": userData.ID_Duan,
     };
 
     if (year) {
@@ -413,6 +412,14 @@ exports.dashboardByDuAn = async (req, res) => {
             },
           ],
         },
+        {
+          model: Ent_user,
+          as: "ent_user",
+          attributes: [
+            "ID_Duan", "Hoten", "UserName", "Email", "ID_Chucvu", "isDelete"
+          ],
+          
+        }
       ],
       where: whereClause,
     });

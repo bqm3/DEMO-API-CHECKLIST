@@ -242,8 +242,7 @@ exports.update = async (req, res) => {
   try {
     const userData = req.user.data;
     if (req.params.id && userData) {
-      const { ID_Toanha, Sothutu, Makhuvuc, MaQrCode, Tenkhuvuc, ID_KhoiCVs } =
-        req.body;
+      const { ID_Toanha, Sothutu, Makhuvuc, MaQrCode, Tenkhuvuc, ID_KhoiCVs } = req.body;
 
       const reqData = {
         ID_Toanha,
@@ -258,17 +257,19 @@ exports.update = async (req, res) => {
 
       // Check if the MaQrCode is not empty and not null
       if (MaQrCode && MaQrCode.trim() !== "") {
-        // Check if the MaQrCode is already taken by another record
+        // Check if the MaQrCode is already taken by another record (excluding current record)
         const existingKhuvuc = await Ent_khuvuc.findOne({
           where: {
             [Op.and]: [
               { MaQrCode: { [Op.not]: null, [Op.ne]: "" } },
-              { ID_Khuvuc: { [Op.ne]: req.params.id } },
-              { MaQrCode: MaQrCode },
+              { ID_Khuvuc: { [Op.ne]: req.params.id } }, // Exclude current record
+              { MaQrCode: MaQrCode }, // Check if new QR code matches any existing one
+              { isDelete: 0 }, // Ensure the record is not marked as deleted
             ],
           },
         });
 
+        // If a record with the same QR code exists, return error
         if (existingKhuvuc) {
           return res.status(400).json({
             message: "Mã QR Code đã tồn tại!",

@@ -602,7 +602,6 @@ exports.deviceToken = async (req, res, next) => {
           "UserName",
           "Email",
           "Password",
-
           "ID_Duan",
           "ID_KhoiCV",
           "deviceToken",
@@ -613,6 +612,7 @@ exports.deviceToken = async (req, res, next) => {
           ID_User: { [Op.ne]: userData.ID_User },
         },
       });
+      console.log('existingUser', existingUser)
 
       // Nếu tìm thấy user khác có deviceToken này, cập nhật deviceToken của họ thành null
       if (existingUser) {
